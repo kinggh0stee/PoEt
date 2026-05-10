@@ -1,0 +1,22 @@
+# KiCad
+*-backups/
+*.bak
+*-cache.lib
+*.kicad_pcb-bak
+*.kicad_prl
+fp-info-cache
+~*
+*.lck
+
+# Generated outputs (regenerate from sources)
+fabrication/gerbers/
+fabrication/*.zip
+fabrication/*.drl
+fabrication/*-pos.csv
+fabrication/*-bom.csv
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store

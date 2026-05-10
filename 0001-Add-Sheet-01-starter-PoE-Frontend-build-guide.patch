@@ -1,0 +1,501 @@
+From 4d18fde7f42db39f2d006dfc9a7fb373ac7d6aea Mon Sep 17 00:00:00 2001
+From: Project Init <claude@anthropic.local>
+Date: Sun, 10 May 2026 15:32:25 +0000
+Subject: [PATCH] Add Sheet 01 starter (PoE Frontend) + build guide
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- hardware/01_PoE_Frontend.kicad_sch: sub-sheet with all 15 hierarchical
+  labels positioned (MDI[0..3]±, PAIR_A/B HI/LO, LED_LINK, LED_ACT,
+  CHASSIS_GND), text annotations describing what to place
+- hardware/PoE-USBC-Gigabit.kicad_sch: root sheet now references
+  01_PoE_Frontend with matching hierarchical pins
+- docs/BUILD-SHEET-01.md: step-by-step component placement guide
+  covering RJ45 magjack, ESD arrays, MDI wiring, center-tap routing,
+  LED hookup, ERC checklist, and common gotchas
+
+Sub-sheets 02-05 still empty; build guides for those will follow.
+---
+ docs/BUILD-SHEET-01.md              | 162 ++++++++++++++++++++++++++++
+ hardware/01_PoE_Frontend.kicad_sch  | 134 +++++++++++++++++++++++
+ hardware/PoE-USBC-Gigabit.kicad_sch | 146 +++++++++++++++++++++++--
+ 3 files changed, 432 insertions(+), 10 deletions(-)
+ create mode 100644 docs/BUILD-SHEET-01.md
+ create mode 100644 hardware/01_PoE_Frontend.kicad_sch
+
+diff --git a/docs/BUILD-SHEET-01.md b/docs/BUILD-SHEET-01.md
+new file mode 100644
+index 0000000..8195efc
+--- /dev/null
++++ b/docs/BUILD-SHEET-01.md
+@@ -0,0 +1,162 @@
++# Build Guide — Sheet 01: PoE Frontend
++
++This document walks through filling in `hardware/01_PoE_Frontend.kicad_sch` in KiCad 8. The starter file already has all hierarchical labels positioned on the right side. You'll add the actual components on the left and wire them up.
++
++## Before you start
++
++1. Open `hardware/PoE-USBC-Gigabit.kicad_pro` in KiCad 8.0 or newer.
++2. In Eeschema, double-click the `01_PoE_Frontend` sheet symbol on the root sheet to descend into it.
++3. You should see the hierarchical labels (MDI0+, MDI0-, ..., CHASSIS_GND) along the right edge.
++
++## Goal
++
++Build this circuit on Sheet 01:
++
++```
++                    Cable                                                 To other sheets
++                      │                                                        │
++                  ┌───┴────┐                                                   │
++                  │ RJ45   │ pins 1,2     ┌──┐                                 │
++                  │ +      │═════════════╞XR╪═MDI0±  →→→  hier_label MDI0±  ───┤
++                  │ Mag    │ pins 3,6     ╧──╧                                 │
++                  │ Jack   │═════════════╞XR╪═MDI1±  →→→  hier_label MDI1±  ───┤
++   PoE switch  ──→│ J1     │ pins 4,5     ╧──╧                                 │
++                  │        │═════════════╞XR╪═MDI2±  →→→  hier_label MDI2±  ───┤
++                  │        │ pins 7,8     ╧──╧                                 │
++                  │        │═════════════╞XR╪═MDI3±  →→→  hier_label MDI3±  ───┤
++                  │        │              ╧──╧                                 │
++                  │        │ ─ centre tap pair A ────→  hier_label PAIR_A_HI ──┤
++                  │        │ ─ centre tap pair A ────→  hier_label PAIR_A_LO ──┤
++                  │        │ ─ centre tap pair B ────→  hier_label PAIR_B_HI ──┤
++                  │        │ ─ centre tap pair B ────→  hier_label PAIR_B_LO ──┤
++                  │        │ ── LED LINK   ←←  hier_label LED_LINK ────────────┤
++                  │        │ ── LED ACT    ←←  hier_label LED_ACT  ────────────┤
++                  │ shield │                                                   │
++                  └───┬────┘                                                   │
++                      │                                                        │
++                      └─→ hier_label CHASSIS_GND ──────────────────────────────┘
++
++ Where ╞XR╪ represents one ESD/TVS array per MDI pair (4 pairs total, 2× NUP4202W1 chips).
++```
++
++## Step 1 — Place J1, the RJ45 magjack
++
++KiCad's stock libraries don't include the exact Bel Fuse 0826-1G1T-DV-F symbol. Two options:
++
++### Option A — Use KiCad stock RJ45 + separate magnetics (recommended for first pass)
++
++1. Place `Connector:RJ45_LED_Shielded` from the symbol library at approx **(60, 70)** mm.
++2. Place 4× `Transformer:Transformer_1P_2S` next to it (one per pair) — these represent the 4 pair-wise transformers inside the integrated jack. Position them at **(85, 50)**, **(85, 65)**, **(85, 80)**, **(85, 95)**.
++3. Wire the 8 RJ45 contact pins (1–8) to the primary side of the corresponding transformer:
++   - Pair A (RJ45 pin 1, 2) → Transformer 1 primary
++   - Pair B (RJ45 pin 3, 6) → Transformer 2 primary
++   - Pair C (RJ45 pin 4, 5) → Transformer 3 primary
++   - Pair D (RJ45 pin 7, 8) → Transformer 4 primary
++4. Set J1 reference to **J1**, value to **RJ45_MAG**, footprint to a Bel-Fuse-compatible 8-pin RJ45 footprint.
++
++### Option B — Use a community symbol (cleaner, takes more setup)
++
++1. Download the Bel Fuse 0826-1G1T-DV-F symbol from SnapEDA, Ultra Librarian, or KiCad's UVL.
++2. Add it as a symbol library in **Preferences → Manage Symbol Libraries**.
++3. Place it at **(60, 70)** mm. All pins (8 RJ45 contacts, 8 PHY-side, 4 center taps, 2 LEDs, shield) are on one component.
++4. Set reference to **J1**.
++
++**Either way:** The "secondary" / PHY-side of the magnetics should net to MDI0+/-, MDI1+/-, MDI2+/-, MDI3+/-.
++
++## Step 2 — Add ESD protection (U101, U102)
++
++Each NUP4202W1 protects 4 single-ended signals. Use one chip per pair of MDI differential pairs:
++
++1. Place `Diode:NUP4202W1` (if available) or use 8× `Diode:TVS_Bidirectional` symbols at approx **(115, 50)** to **(115, 90)**.
++2. Reference them **U101** (covers MDI0±, MDI1±) and **U102** (covers MDI2±, MDI3±).
++3. Connect each MDI line through one TVS pin to GND (the array shares a common GND pin).
++
++**Note:** TVS arrays go on the secondary side of the magnetics, between the magjack and the labels. Don't put them on the cable side — the magnetics already isolate.
++
++## Step 3 — Wire to hierarchical labels
++
++Draw wires from each MDI signal at the secondary side of magnetics, through the ESD array, all the way to the corresponding hierarchical label. The labels are pre-positioned at:
++
++| Label | Position (mm) |
++|---|---|
++| MDI0+ | (180.34, 40.64) |
++| MDI0- | (180.34, 45.72) |
++| MDI1+ | (180.34, 50.80) |
++| MDI1- | (180.34, 55.88) |
++| MDI2+ | (180.34, 60.96) |
++| MDI2- | (180.34, 66.04) |
++| MDI3+ | (180.34, 71.12) |
++| MDI3- | (180.34, 76.20) |
++
++Use `W` to start a wire in Eeschema, click the symbol pin, then click each grid point until the wire touches the hierarchical label.
++
++## Step 4 — Center taps to PAIR labels
++
++Each transformer's primary side has a center tap (the midpoint of the cable-side winding). For 802.3 PoE, both Mode A (data pairs) and Mode B (spare pairs) carry power.
++
++1. Tie the center taps of pair-set A's transformers (pairs A and B / pins 1-2 and 3-6) to a single net `PAIR_A`. Connect to both `PAIR_A_HI` and `PAIR_A_LO` labels — actually, separately route the (+) and (–) center taps of one diode bridge's input to PAIR_A_HI / PAIR_A_LO.
++2. Same for pair-set B (pairs C and D / pins 4-5 and 7-8) → `PAIR_B_HI`, `PAIR_B_LO`.
++
++**Sanity check:** Each pair-set in 802.3 PoE provides one polarity-arbitrary DC path. The Schottky bridges on Sheet 02 will rectify each pair-set's DC into a fixed-polarity rail.
++
++## Step 5 — LEDs (LED_LINK, LED_ACT)
++
++Most integrated mag jacks have built-in LED holders driven by the PHY:
++
++1. The RTL8153B drives `LED_LINK` and `LED_ACT` from Sheet 04. Those nets arrive on this sheet via the corresponding hierarchical labels (note: they're typed `input` on Sheet 01, since the signal flows in from another sheet).
++2. Wire `LED_LINK` and `LED_ACT` directly to the LED pins of J1.
++3. The LED anodes (+) typically pull up to a sheet-local +3V3. Add a power flag if needed, plus current-limiting resistors (R101, R102 = 330 Ω) in series with each LED.
++
++If your magjack doesn't have integrated LEDs, instead place 2× standalone LEDs near the RJ45 cutout in the enclosure (you'd add LED1, LED2 here and wire them to LED_LINK/LED_ACT through resistors).
++
++## Step 6 — Chassis ground
++
++1. Drag a wire from J1's shield pin to the `CHASSIS_GND` hierarchical label.
++2. On Sheet 02, you'll add a 1 MΩ resistor || 1 nF/2 kV cap between CHASSIS_GND and circuit GND for ESD bleed (the Bob Smith termination handles common-mode coupling).
++
++## Step 7 — Bob Smith termination
++
++For unused common-mode coupling on the cable side, add a 75 Ω resistor on each pair's center tap to a common node, and a 1 kV cap from that node to chassis ground.
++
++**Before adding manually**: read the magjack's datasheet — most integrated magjacks already have Bob Smith termination internal to the part. If so, skip this step (verify by checking the data­sheet's internal schematic).
++
++## Step 8 — Run ERC
++
++Tools → Electrical Rules Check (or `F8`).
++
++Expected result: 0 errors, possibly 1–2 warnings about hierarchical labels not yet driven (which is fine — Sheet 04 will drive LED_LINK and LED_ACT once it's built).
++
++If you see "unconnected pin" errors, those are usually:
++- LED pins on the magjack that don't have current-limiting resistors yet (add them)
++- Unused RJ45 shield pins or extra magnetic taps (mark with explicit `~No Connection` flags from the toolbar)
++
++## Step 9 — Annotate and check footprints
++
++1. Tools → Annotate Schematic — gives every component a unique reference (J1, U101, U102, R101, etc.)
++2. Tools → Assign Footprints — pick the right physical footprint for each component:
++   - J1 → corresponding 0826 / JK0-0177 footprint (download from manufacturer)
++   - U101, U102 → SOT-23-6 (NUP4202W1 package)
++   - R101, R102 → 0402 or 0603 SMD
++3. Save and move on to Sheet 02.
++
++## Common gotchas
++
++- **Polarity of magnetics:** the dot on the transformer symbol matters. Cable side is the dotted side conventionally; PHY side is undotted. Get this wrong and the link won't establish.
++- **Pair numbering:** "Pair 1" in some datasheets = MDI[0] in others. Stick to MDI[0..3] convention internally and map to RJ45 pins per the IEEE 802.3 1000BASE-T table:
++  - MDI[0] = RJ45 pins 1,2 (BI_DA in 1000BT)
++  - MDI[1] = RJ45 pins 3,6 (BI_DB)
++  - MDI[2] = RJ45 pins 4,5 (BI_DC)
++  - MDI[3] = RJ45 pins 7,8 (BI_DD)
++- **Center-tap polarity:** The "+" of pair set A vs "-" depends on which RJ45 pin you treat as positive. PoE is polarity-insensitive precisely because of the diode bridges on Sheet 02 — but be consistent in labeling so the bridge wiring on Sheet 02 makes sense.
++
++## When you're done
++
++Sheet 01 is complete when:
++
++- ✅ ERC passes (or only has expected warnings)
++- ✅ All 15 hierarchical labels have wires connected to them
++- ✅ Every component has a reference designator and footprint assigned
++- ✅ The MDI signals come out the secondary (PHY) side of magnetics, never directly from RJ45 contacts
++- ✅ Save, commit, push.
++
++Then move on to `BUILD-SHEET-02.md` (which I haven't written yet — just say the word).
+diff --git a/hardware/01_PoE_Frontend.kicad_sch b/hardware/01_PoE_Frontend.kicad_sch
+new file mode 100644
+index 0000000..ba8410d
+--- /dev/null
++++ b/hardware/01_PoE_Frontend.kicad_sch
+@@ -0,0 +1,134 @@
++(kicad_sch
++	(version 20231120)
++	(generator "eeschema")
++	(generator_version "8.0")
++	(uuid "10000000-0000-0000-0000-000000000001")
++	(paper "A4")
++	(title_block
++		(title "PoEt — Sheet 01: PoE Frontend")
++		(date "2026-05-10")
++		(rev "A")
++		(comment 1 "RJ45 + integrated magnetics, ESD protection, MDI breakout")
++		(comment 2 "PoE pair-set center taps to PD converter (sheet 02)")
++		(comment 3 "MDI[0..3] pairs to RTL8153B (sheet 04)")
++	)
++	(lib_symbols)
++
++	(text "SHEET 01 — PoE FRONTEND"
++		(exclude_from_sim no)
++		(at 25.4 12.7 0)
++		(effects (font (size 3.0 3.0) bold) (justify left bottom))
++		(uuid "10000000-0000-0000-0000-000000001000")
++	)
++
++	(text "Place here:\n  • J1: RJ45 with integrated PoE-rated magnetics\n        (Bel Fuse 0826-1G1T-DV-F or Pulse JK0-0177NL)\n  • U101, U102: NUP4202W1T1G ESD arrays on MDI pairs\n  • Bob Smith termination on cable side (verify in jack datasheet)\n  • R for Chassis-GND-to-circuit-GND bleed (1 MΩ + 1 nF/2 kV)\n\nMDI labels below = secondary (PHY-side) of magnetics.\nPair-set labels = center taps for PoE power extraction.\n\nSee BUILD-SHEET-01.md for step-by-step component placement."
++		(exclude_from_sim no)
++		(at 25.4 30.48 0)
++		(effects (font (size 1.27 1.27)) (justify left top))
++		(uuid "10000000-0000-0000-0000-000000001001")
++	)
++
++	(text "MDI to RTL8153B  ➜"
++		(exclude_from_sim no)
++		(at 142.24 38.1 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "10000000-0000-0000-0000-000000002000")
++	)
++
++	(hierarchical_label "MDI0+" (shape output) (at 180.34 40.64 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000002001")
++	)
++	(hierarchical_label "MDI0-" (shape output) (at 180.34 45.72 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000002002")
++	)
++	(hierarchical_label "MDI1+" (shape output) (at 180.34 50.8 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000002003")
++	)
++	(hierarchical_label "MDI1-" (shape output) (at 180.34 55.88 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000002004")
++	)
++	(hierarchical_label "MDI2+" (shape output) (at 180.34 60.96 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000002005")
++	)
++	(hierarchical_label "MDI2-" (shape output) (at 180.34 66.04 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000002006")
++	)
++	(hierarchical_label "MDI3+" (shape output) (at 180.34 71.12 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000002007")
++	)
++	(hierarchical_label "MDI3-" (shape output) (at 180.34 76.2 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000002008")
++	)
++
++	(text "PoE pair center taps to PD converter  ➜"
++		(exclude_from_sim no)
++		(at 142.24 88.9 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "10000000-0000-0000-0000-000000003000")
++	)
++
++	(hierarchical_label "PAIR_A_HI" (shape output) (at 180.34 91.44 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000003001")
++	)
++	(hierarchical_label "PAIR_A_LO" (shape output) (at 180.34 96.52 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000003002")
++	)
++	(hierarchical_label "PAIR_B_HI" (shape output) (at 180.34 101.6 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000003003")
++	)
++	(hierarchical_label "PAIR_B_LO" (shape output) (at 180.34 106.68 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000003004")
++	)
++
++	(text "LEDs from RTL8153B  ➜"
++		(exclude_from_sim no)
++		(at 142.24 119.38 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "10000000-0000-0000-0000-000000004000")
++	)
++
++	(hierarchical_label "LED_LINK" (shape input) (at 180.34 121.92 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000004001")
++	)
++	(hierarchical_label "LED_ACT" (shape input) (at 180.34 127.0 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000004002")
++	)
++
++	(text "Chassis ground to mounting holes  ➜"
++		(exclude_from_sim no)
++		(at 142.24 139.7 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "10000000-0000-0000-0000-000000005000")
++	)
++
++	(hierarchical_label "CHASSIS_GND" (shape passive) (at 180.34 142.24 0)
++		(effects (font (size 1.524 1.524)) (justify left))
++		(uuid "10000000-0000-0000-0000-000000005001")
++	)
++
++	(text "──── ROUTE NOTES ────\n• Group MDI0± and MDI1± as one diff pair bundle\n• Group MDI2± and MDI3± as another\n• Length-match within 0.5 mm (intra-pair: 0.1 mm)\n• 100 Ω diff impedance (assigned by net class)\n• Keep pairs ≤ 25 mm from RJ45 to RTL8153B"
++		(exclude_from_sim no)
++		(at 25.4 158.75 0)
++		(effects (font (size 1.27 1.27)) (justify left top))
++		(uuid "10000000-0000-0000-0000-000000006000")
++	)
++
++	(sheet_instances
++		(path "/" (page "2"))
++	)
++	(embedded_fonts no)
++)
+diff --git a/hardware/PoE-USBC-Gigabit.kicad_sch b/hardware/PoE-USBC-Gigabit.kicad_sch
+index e9dc3c2..e46b9d8 100644
+--- a/hardware/PoE-USBC-Gigabit.kicad_sch
++++ b/hardware/PoE-USBC-Gigabit.kicad_sch
+@@ -2,23 +2,149 @@
+ 	(version 20231120)
+ 	(generator "eeschema")
+ 	(generator_version "8.0")
+-	(uuid "11111111-2222-3333-4444-555555555555")
++	(uuid "00000000-0000-0000-0000-000000000001")
+ 	(paper "A3")
+ 	(title_block
+-		(title "PoE to USB-C Gigabit Adapter")
++		(title "PoEt — PoE to USB-C Gigabit Adapter")
+ 		(date "2026-05-10")
+ 		(rev "A")
+-		(company "")
+-		(comment 1 "Root sheet — see hierarchical sub-sheets")
+-		(comment 2 "PoE 802.3at  →  USB-C 5V/3A + USB 3.0 Gigabit Ethernet")
+-		(comment 3 "")
+-		(comment 4 "")
++		(comment 1 "Root sheet — hierarchical sub-sheets for each functional block")
++		(comment 2 "PoE 802.3af  →  Si3402-B  →  RTL8153B USB 3.0 / GbE  →  USB-C 5 V/2 A")
+ 	)
+ 	(lib_symbols)
+-	(sheet_instances
+-		(path "/"
+-			(page "1")
++
++	(text "PoEt — Block Diagram"
++		(exclude_from_sim no)
++		(at 25.4 12.7 0)
++		(effects (font (size 4.0 4.0) bold) (justify left bottom))
++		(uuid "00000000-0000-0000-0000-000000010001")
++	)
++
++	(text "Open each sub-sheet to fill in the schematic."
++		(exclude_from_sim no)
++		(at 25.4 22.86 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "00000000-0000-0000-0000-000000010002")
++	)
++
++	(sheet
++		(at 38.1 38.1)
++		(size 50.8 100.33)
++		(exclude_from_sim no)
++		(in_bom yes)
++		(on_board yes)
++		(dnp no)
++		(fields_autoplaced yes)
++		(stroke (width 0.1524) (type solid))
++		(fill (color 0 0 0 0.0000))
++		(uuid "00000001-0001-0000-0000-000000000000")
++		(property "Sheetname" "01_PoE_Frontend"
++			(at 38.1 37.3104 0)
++			(effects (font (size 1.524 1.524)) (justify left bottom))
++		)
++		(property "Sheetfile" "01_PoE_Frontend.kicad_sch"
++			(at 38.1 138.9314 0)
++			(effects (font (size 1.27 1.27)) (justify left top))
++		)
++		(pin "MDI0+" output (at 88.9 45.72 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010001")
++		)
++		(pin "MDI0-" output (at 88.9 50.8 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010002")
++		)
++		(pin "MDI1+" output (at 88.9 55.88 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010003")
++		)
++		(pin "MDI1-" output (at 88.9 60.96 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010004")
++		)
++		(pin "MDI2+" output (at 88.9 66.04 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010005")
++		)
++		(pin "MDI2-" output (at 88.9 71.12 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010006")
++		)
++		(pin "MDI3+" output (at 88.9 76.2 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010007")
++		)
++		(pin "MDI3-" output (at 88.9 81.28 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010008")
++		)
++		(pin "PAIR_A_HI" output (at 88.9 91.44 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010009")
+ 		)
++		(pin "PAIR_A_LO" output (at 88.9 96.52 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010010")
++		)
++		(pin "PAIR_B_HI" output (at 88.9 101.6 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010011")
++		)
++		(pin "PAIR_B_LO" output (at 88.9 106.68 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010012")
++		)
++		(pin "LED_LINK" input (at 88.9 116.84 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010013")
++		)
++		(pin "LED_ACT" input (at 88.9 121.92 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010014")
++		)
++		(pin "CHASSIS_GND" passive (at 88.9 132.08 0)
++			(effects (font (size 1.524 1.524)) (justify right))
++			(uuid "00000001-0001-0000-0000-000000010015")
++		)
++		(instances
++			(project "PoE-USBC-Gigabit"
++				(path "/00000000-0000-0000-0000-000000000001"
++					(page "2")
++				)
++			)
++		)
++	)
++
++	(text "[Sheet 02: PoE PD + Converter] — TODO"
++		(exclude_from_sim no)
++		(at 109.22 50.8 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "00000000-0000-0000-0000-000000020000")
++	)
++
++	(text "[Sheet 03: Bias Rails] — TODO"
++		(exclude_from_sim no)
++		(at 109.22 71.12 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "00000000-0000-0000-0000-000000030000")
++	)
++
++	(text "[Sheet 04: RTL8153B Bridge] — TODO"
++		(exclude_from_sim no)
++		(at 109.22 91.44 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "00000000-0000-0000-0000-000000040000")
++	)
++
++	(text "[Sheet 05: USB-C Connector] — TODO"
++		(exclude_from_sim no)
++		(at 109.22 111.76 0)
++		(effects (font (size 1.524 1.524) italic) (justify left bottom))
++		(uuid "00000000-0000-0000-0000-000000050000")
++	)
++
++	(sheet_instances
++		(path "/" (page "1"))
+ 	)
+ 	(embedded_fonts no)
+ )
+-- 
+2.43.0
+
