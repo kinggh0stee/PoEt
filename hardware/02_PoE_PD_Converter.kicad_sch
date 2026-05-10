@@ -1,0 +1,103 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "20000000-0000-0000-0000-000000000002")
+	(paper "A4")
+	(title_block
+		(title "PoEt — Sheet 02: PoE PD + Flyback Converter")
+		(date "2026-05-10")
+		(rev "A")
+		(comment 1 "Schottky bridges → Si3402-B PoE PD → flyback T1 → 5 V / 2 A secondary rail")
+		(comment 2 "Primary side LEFT of barrier | Secondary side RIGHT of barrier")
+		(comment 3 "CREEPAGE RULE: ≥ 4 mm slot in all 4 Cu layers at isolation barrier")
+	)
+	(lib_symbols)
+
+	(text "SHEET 02 — PoE PD + FLYBACK CONVERTER"
+		(exclude_from_sim no)
+		(at 25.4 12.7 0)
+		(effects (font (size 3.0 3.0) bold) (justify left bottom))
+		(uuid "20000000-0000-0000-0000-000000001000")
+	)
+
+	(text "PRIMARY SIDE (PoE voltage, ~37–57 V DC)\n────────────────────────────────────────\nPlace here:\n  • D1: DF06S bridge rectifier — pair set A (PAIR_A_HI, PAIR_A_LO)\n  • D2: DF06S bridge rectifier — pair set B (PAIR_B_HI, PAIR_B_LO)\n  • Tie D1/D2 outputs together → V_POE+ / V_POE- bus\n  • C1: 10 µF / 100 V X7R 1210 — V_POE primary bulk\n  • C2: 47 µF / 100 V Al electrolytic — V_POE primary bulk\n  • D3: SMAJ58A TVS across V_POE+/V_POE- (cathode to V_POE+)\n  • FB1: 600 Ω ferrite bead in series with V_POE+ before Si3402-B VDD\n  • R1: 24.9 kΩ 1% 0402 — RDET pin to GND_POE (detection signature)\n  • R2: 12.1 kΩ 1% 0402 — RCLS pin to GND_POE (Class 3 classification)\n\nNet names on primary side:\n  V_POE+, V_POE- (== GND_POE), V_SW (Si3402-B switching node)"
+		(exclude_from_sim no)
+		(at 25.4 25.4 0)
+		(effects (font (size 1.27 1.27)) (justify left top))
+		(uuid "20000000-0000-0000-0000-000000001001")
+	)
+
+	(text "Si3402-B KEY PINS (verify with datasheet AN1004)\n──────────────────────────────────────────────────\nVDD  → V_POE+ (via FB1)\nRTN  → GND_POE\nSW   → primary winding pin 1 of T1 (switching node)\nRDET → R1 → GND_POE  (24.9 kΩ)\nRCLS → R2 → GND_POE  (12.1 kΩ → Class 3)\nFB   → optocoupler U6 collector (regulation feedback)\nCOMP → RC compensation network to GND_POE\nPWOK → optional LED/monitoring (leave NC if unused)\n\nReference: SiLabs AN1004 Fig. 11 (complete application circuit)"
+		(exclude_from_sim no)
+		(at 25.4 100.33 0)
+		(effects (font (size 1.27 1.27)) (justify left top))
+		(uuid "20000000-0000-0000-0000-000000001002")
+	)
+
+	(text "════════ ISOLATION BARRIER ════════\n         ← 4 mm → \n Place a KiCad Zone Cut here on ALL layers\n Mark with a yellow courtyard line on silkscreen\n Y-cap C14 (1 nF / 2 kV) bridges GND_POE to GND here"
+		(exclude_from_sim no)
+		(at 106.68 55.88 0)
+		(effects (font (size 1.27 1.27) bold) (justify center top))
+		(uuid "20000000-0000-0000-0000-000000001003")
+	)
+
+	(text "SECONDARY SIDE (isolated 5 V rail)\n────────────────────────────────────\nPlace here:\n  • T1 secondary winding → D4 anode\n  • D4: SS34 Schottky 60 V / 3 A — secondary rectifier\n       Cathode → +5V rail\n  • C10: 220 µF / 16 V polymer low-ESR — main output bulk\n  • C11–C13: 22 µF / 10 V X5R 1210 — additional output bulk\n  • C14: 1 nF / 2 kV Y-cap — GND_POE to GND_SEC (isolation bridge)\n         Place this straddling the isolation barrier line\n  • U6: PC817B optocoupler\n         LED side (pins 1-2): anode via R_OPT to +5V,\n                              cathode to TL431 anode\n         Transistor side (pins 3-4): collector to Si3402-B FB pin,\n                                     emitter to GND_POE\n  • U7: TL431 shunt regulator\n         REF pin → resistor divider from +5V to GND_SEC\n         R_UPPER (10 kΩ) from +5V to REF\n         R_LOWER (10 kΩ) from REF to GND_SEC → Vout = 5.0 V\n         ANODE → GND_SEC\n         CATHODE → optocoupler LED cathode\n  • R_OPT: 560 Ω 0402 — optocoupler LED current limit\n  • Snubber across T1 primary: 220 Ω + 470 pF in series\n    (place on primary side, across switching node and VDD)"
+		(exclude_from_sim no)
+		(at 127.0 25.4 0)
+		(effects (font (size 1.27 1.27)) (justify left top))
+		(uuid "20000000-0000-0000-0000-000000001004")
+	)
+
+	(text "──── ROUTE NOTES ────\n• Primary side: keep V_POE loop (bridges → bulk cap → Si3402-B) area as small as possible — high di/dt\n• Switch node V_SW trace: short and fat (≥ 0.5 mm), avoid coupling to MDI or USB signals\n• Feedback path: keep optocoupler + TL431 traces short, away from switch node\n• Y-cap C14 must physically straddle the isolation cut line and connect between the two separate GND pours\n• Output bulk caps C10–C13 go as close to the +5V hierarchical label as possible\n• Add stitching vias around primary GND pour perimeter to tie all primary GND copper together"
+		(exclude_from_sim no)
+		(at 25.4 205.74 0)
+		(effects (font (size 1.27 1.27)) (justify left top))
+		(uuid "20000000-0000-0000-0000-000000001005")
+	)
+
+	(hierarchical_label "PAIR_A_HI" (shape input) (at 25.4 50.8 180)
+		(effects (font (size 1.524 1.524)) (justify right))
+		(uuid "20000000-0000-0000-0000-000000002001")
+	)
+	(hierarchical_label "PAIR_A_LO" (shape input) (at 25.4 55.88 180)
+		(effects (font (size 1.524 1.524)) (justify right))
+		(uuid "20000000-0000-0000-0000-000000002002")
+	)
+	(hierarchical_label "PAIR_B_HI" (shape input) (at 25.4 65.78 180)
+		(effects (font (size 1.524 1.524)) (justify right))
+		(uuid "20000000-0000-0000-0000-000000002003")
+	)
+	(hierarchical_label "PAIR_B_LO" (shape input) (at 25.4 70.86 180)
+		(effects (font (size 1.524 1.524)) (justify right))
+		(uuid "20000000-0000-0000-0000-000000002004")
+	)
+
+	(hierarchical_label "+5V" (shape output) (at 180.34 88.9 0)
+		(effects (font (size 1.524 1.524)) (justify left))
+		(uuid "20000000-0000-0000-0000-000000003001")
+	)
+	(hierarchical_label "GND" (shape passive) (at 180.34 99.06 0)
+		(effects (font (size 1.524 1.524)) (justify left))
+		(uuid "20000000-0000-0000-0000-000000003002")
+	)
+
+	(text "← inputs from\n   Sheet 01 pair\n   center taps"
+		(exclude_from_sim no)
+		(at 25.4 77.47 0)
+		(effects (font (size 1.27 1.27) italic) (justify left top))
+		(uuid "20000000-0000-0000-0000-000000004001")
+	)
+
+	(text "→ 5 V / 2 A rail\n   to Sheet 03\n   (bias LDOs)\n   and Sheet 05\n   (USB-C VBUS)"
+		(exclude_from_sim no)
+		(at 167.64 85.09 0)
+		(effects (font (size 1.27 1.27) italic) (justify right top))
+		(uuid "20000000-0000-0000-0000-000000004002")
+	)
+
+	(sheet_instances
+		(path "/" (page "3"))
+	)
+	(embedded_fonts no)
+)
