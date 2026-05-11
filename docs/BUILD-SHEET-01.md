@@ -159,4 +159,4 @@ Sheet 01 is complete when:
 - ✅ The MDI signals come out the secondary (PHY) side of magnetics, never directly from RJ45 contacts
 - ✅ Save, commit, push.
 
-Then move on to `BUILD-SHEET-02.md` (which I haven't written yet — just say the word).
+Then move on to `BUILD-SHEET-02.md` (PoE PD + Flyback Converter).

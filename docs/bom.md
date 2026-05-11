@@ -8,12 +8,13 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 |---|---|---|---|---|---|
 | U1 | 1 | PoE PD + flyback | 802.3af PD interface, integrated 100 V switch + flyback PWM controller | **Si3402-B-GM** (Skyworks) | Digi-Key 336-3293-1-ND |
 | U2 | 1 | USB 3.0 to GbE | USB 3.0 device + Gigabit PHY+MAC | **RTL8153B-VC-CG** (Realtek) | LCSC C77999 |
-| U3 | 1 | EEPROM | 93C46 1 Kbit MicroWire | 93LC46BT-I/OT | Digi-Key |
+| U3 | 1 | EEPROM | 93LC46 1 Kbit MicroWire (CMOS 3-wire, 2.0–5.5 V) | 93LC46BT-I/OT | Digi-Key |
 | U4 | 1 | 3.3 V LDO (RTL8153B I/O) | 500 mA low-noise | AP2112K-3.3 | LCSC C51118 |
 | U5 | 1 | 1.0 V LDO (RTL8153B core) | 500 mA fixed 1.0 V | RT9013-10GB | LCSC C47773 |
 | U6 | 1 | Optocoupler | Si3402-B feedback isolation | PC817B | LCSC C7440 |
 | U7 | 1 | Shunt regulator | TL431 reference | TL431ASN | LCSC C7831 |
-| U8, U9 | 2 | ESD protection | 4-line array | NUP4202W1T1G | Digi-Key |
+| U8, U9 | 2 | ESD protection (MDI) | 4-line TVS array — Sheet 01, MDI0±–MDI3± | NUP4202W1T1G | Digi-Key |
+| U10 | 1 | ESD protection (USB-C) | 4-line TVS array — Sheet 05, SS pair + D+/D- | NUP4202W1T1G | Digi-Key |
 
 ## Magnetics & connectors
 
@@ -75,7 +76,7 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 
 | Category | Single qty | 1k qty |
 |---|---|---|
-| Critical ICs (U1–U9) | $9.50 | $5.50 |
+| Critical ICs (U1–U10) | $9.75 | $5.65 |
 | Magnetics (J1, T1, L1, L2) | $5.20 | $2.80 |
 | USB-C receptacle | $0.80 | $0.35 |
 | Passives (~80 parts) | $4.00 | $1.20 |

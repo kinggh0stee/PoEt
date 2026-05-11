@@ -23,13 +23,13 @@ This is the last sheet. It terminates all the signals from the rest of the proje
                                   R11 (22 kΩ) ────────────────────► CC2 (B5)
                                               (pull to +5V → advertise 1.5 A source)
 
-  USB_SSTX+ ──► C15 (100 nF) ──► U9 ESD ─────────────────────────► TX1+ (A2)
-  USB_SSTX- ──► C16 (100 nF) ──► U9 ESD ─────────────────────────► TX1- (A3)
-  USB_SSRX+ ──────────────────── U9 ESD ─────────────────────────► RX1+ (B10)
-  USB_SSRX- ──────────────────── U9 ESD ─────────────────────────► RX1- (B11)
+  USB_SSTX+ ──► C15 (100 nF) ──► U10 ESD ─────────────────────────► TX1+ (A2)
+  USB_SSTX- ──► C16 (100 nF) ──► U10 ESD ─────────────────────────► TX1- (A3)
+  USB_SSRX+ ──────────────────── U10 ESD ─────────────────────────► RX1+ (B10)
+  USB_SSRX- ──────────────────── U10 ESD ─────────────────────────► RX1- (B11)
 
-  USB_DP ─────────────────────── U9 ESD ─────────────────────────► D+ A6 + B6 (shorted)
-  USB_DM ─────────────────────── U9 ESD ─────────────────────────► D- A7 + B7 (shorted)
+  USB_DP ─────────────────────── U10 ESD ─────────────────────────► D+ A6 + B6 (shorted)
+  USB_DM ─────────────────────── U10 ESD ─────────────────────────► D- A7 + B7 (shorted)
 
                                               TX2+, TX2-, RX2+, RX2-  → NC
                                               SBU1, SBU2               → NC
@@ -93,17 +93,17 @@ These resistors tell the host that this port is a USB-C power source advertising
 
 > A 22 kΩ Rp to 5 V = USB-C "Type-C Current" advertisement of 1.5 A (7.5 W). The actual supply can deliver 2 A / 10 W, but this conservative advertisement prevents a host from drawing more than 1.5 A under normal auto-negotiation. See design-spec.md §1.3.
 
-## Step 5 — ESD protection (U9)
+## Step 5 — ESD protection (U10)
 
 Place the ESD array before routing signals to J2 — ESD protection goes between the internal circuitry and the connector, as close to the connector as possible.
 
-1. Place `Diode:NUP4202W1` (or `Diode:PRTR5V0U2X` as an alternate 2-line SOT-363 part) for **U9** at approximately **(115, 80)**.
+1. Place `Diode:NUP4202W1` (or `Diode:PRTR5V0U2X` as an alternate 2-line SOT-363 part) for **U10** at approximately **(115, 80)**.
 2. Wire:
-   - U9 line 1 pair → USB_SSTX+ / USB_SSTX- nets (TX SuperSpeed pair)
-   - U9 line 2 pair → USB_SSRX+ / USB_SSRX- nets (RX SuperSpeed pair)
+   - U10 line 1 pair → USB_SSTX+ / USB_SSTX- nets (TX SuperSpeed pair)
+   - U10 line 2 pair → USB_SSRX+ / USB_SSRX- nets (RX SuperSpeed pair)
    - (If using NUP4202W1 in SOT-23-6: 4 lines in one package — use two chips for SS + D+/D- or one NUP4202W1 per differential pair)
    - A separate NUP4202W1 (or shared array) on USB_DP / USB_DM
-   - All GND pins of U9 → `GND`
+   - All GND pins of U10 → `GND`
 
 The SS pair ESD arrays must not add significant capacitance to the 5 Gbps lines. The NUP4202W1 and PRTR5V0U2X are both specified for USB 3.0 speeds.
 
@@ -111,8 +111,8 @@ The SS pair ESD arrays must not add significant capacitance to the 5 Gbps lines.
 
 USB 3.0 SuperSpeed TX lines require AC coupling to remove DC offset between transmitter and receiver.
 
-1. Place `Device:C` for **C15** (100 nF / 16 V X7R 0402) in series on the `USB_SSTX+` line, between the U9 ESD array output and J2 TX1+ (A2).
-2. Place `Device:C` for **C16** (100 nF / 16 V X7R 0402) in series on the `USB_SSTX-` line, between U9 and J2 TX1- (A3).
+1. Place `Device:C` for **C15** (100 nF / 16 V X7R 0402) in series on the `USB_SSTX+` line, between the U10 ESD array output and J2 TX1+ (A2).
+2. Place `Device:C` for **C16** (100 nF / 16 V X7R 0402) in series on the `USB_SSTX-` line, between U10 and J2 TX1- (A3).
 
 **RX pair (USB_SSRX±) has no AC-coupling caps here** — the RTL8153B has internal DC blocking on its RX inputs. Adding external caps on RX would create an unwanted RC filter.
 
@@ -173,7 +173,7 @@ If you see:
 - ✅ F1 (PPTC) in series between `+5V` and VBUS node
 - ✅ C11–C14 all at VBUS node (3× 22 µF + 100 nF)
 - ✅ R10, R11 (22 kΩ) on CC1 and CC2 to `+5V`
-- ✅ U9 ESD array on SS pairs and D+/D-
+- ✅ U10 ESD array on SS pairs and D+/D-
 - ✅ C15, C16 (100 nF) on TX pair only; no caps on RX pair
 - ✅ D+ shorted A6+B6; D- shorted A7+B7
 - ✅ TX2/RX2/SBU pins have No-Connect flags
@@ -181,12 +181,12 @@ If you see:
 
 ## Annotate and check footprints
 
-1. **Tools → Annotate Schematic** — assigns J2, F1, R10, R11, U9, C11–C16.
+1. **Tools → Annotate Schematic** — assigns J2, F1, R10, R11, U10, C11–C16.
 2. **Tools → Assign Footprints**:
    - J2 → footprint from GCT (download from GCT website for USB4105-GF-A)
    - F1 → `Resistor_SMD:R_1206_3216Metric` (PPTC fuses use resistor-style 1206 footprint)
    - R10, R11 → `Resistor_SMD:R_0402_1005Metric`
-   - U9 → `Package_TO_SOT_SMD:SOT-23-6` (NUP4202W1 is SOT-23-6)
+   - U10 → `Package_TO_SOT_SMD:SOT-23-6` (NUP4202W1 is SOT-23-6)
    - C11–C13 → `Capacitor_SMD:C_1210_3225Metric`
    - C14–C16 → `Capacitor_SMD:C_0402_1005Metric`
 

@@ -69,19 +69,29 @@ Single-chip PoE PD (Si3402-B handles detect, classify, hot-swap, and flyback con
 ## Repository Layout
 
 ```
-PoE-USBC-Gigabit/
+PoEt/
 ├── README.md
-├── hardware/                       ← KiCad project
+├── hardware/                           ← KiCad project
 │   ├── PoE-USBC-Gigabit.kicad_pro
-│   ├── PoE-USBC-Gigabit.kicad_sch
-│   └── PoE-USBC-Gigabit.kicad_pcb
+│   ├── PoE-USBC-Gigabit.kicad_sch     ← root sheet (sheet symbols + title block)
+│   ├── PoE-USBC-Gigabit.kicad_pcb     ← PCB layout (4-layer, 60×30 mm starter)
+│   ├── 01_PoE_Frontend.kicad_sch      ← RJ45, magnetics, ESD, MDI breakout
+│   ├── 02_PoE_PD_Converter.kicad_sch  ← bridges, Si3402-B, flyback, feedback
+│   ├── 03_Bias_Rails.kicad_sch        ← 3.3 V and 1.0 V LDOs
+│   ├── 04_RTL8153B_Bridge.kicad_sch   ← USB↔GbE controller, EEPROM, crystal
+│   └── 05_USBC_Connector.kicad_sch    ← USB-C receptacle, CC Rp, ESD, AC-coupling
 ├── docs/
-│   ├── design-spec.md              ← electrical spec, layout rules
-│   ├── bom.md                      ← parts list
-│   └── schematic-plan.md           ← 5 hierarchical sub-sheets
-├── fabrication/                    ← gerbers + assembly drawings (generated)
+│   ├── design-spec.md                 ← electrical spec, layout rules
+│   ├── bom.md                         ← parts list
+│   ├── schematic-plan.md              ← sheet I/O contracts and conventions
+│   ├── BUILD-SHEET-01.md              ← step-by-step guide for Sheet 01
+│   ├── BUILD-SHEET-02.md              ← step-by-step guide for Sheet 02
+│   ├── BUILD-SHEET-03.md              ← step-by-step guide for Sheet 03
+│   ├── BUILD-SHEET-04.md              ← step-by-step guide for Sheet 04
+│   └── BUILD-SHEET-05.md              ← step-by-step guide for Sheet 05
+├── fabrication/                        ← gerbers + assembly files (KiCad-generated, not in repo)
 └── firmware/
-    └── eeprom-image.md             ← RTL8153B EEPROM (VID/PID/MAC)
+    └── eeprom-image.md                ← RTL8153B EEPROM layout (VID/PID/MAC)
 ```
 
 ## Getting Started

@@ -55,7 +55,7 @@ PoE-USBC-Gigabit.kicad_sch                      ← root, sheet symbols + title 
 - **Local components:**
   - J2 USB-C 24-pin receptacle
   - **R10, R11** = 22 kΩ 1 % from CC1, CC2 to `+5V` (Rp = advertise 1.5 A source)
-  - U9 ESD array on SS pair and D+/D-
+  - U10 ESD array on SS pair and D+/D-
   - C15, C16 (100 nF) AC-coupling caps on USB_SSTX+/- pair only — between RTL8153B and J2
   - C11–C14 VBUS bulk at the connector (3× 22 µF X5R + 100 nF)
 - **Connector pin notes:**

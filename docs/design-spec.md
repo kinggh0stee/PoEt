@@ -71,7 +71,7 @@ Feedback: TL431 + PC817B optocoupler across isolation barrier (standard pattern;
 | 5 V rail to RTL8153B | — | ~1.5 W internal load | — | — |
 | 5 V rail to USB-C VBUS | — | up to 10 W (5 V × 2 A) | — | — |
 
-⚠️ Total available on the 5 V rail: ~10.6 W. RTL8153B draws ~1.5 W (varies with link rate), so USB-C VBUS gets ~9 W headroom — slightly above the 10 W advertised. Add output current limiting (TPS25940 or fuse) so a host pulling > 2.2 A causes a clean shutoff instead of a brownout that drops the Ethernet link.
+⚠️ Total available on the 5 V rail: ~10.6 W. RTL8153B draws ~1.5 W (varies with link rate), so USB-C VBUS gets ~9 W headroom — comfortably above the 7.5 W advertised (22 kΩ CC Rp → 5 V @ 1.5 A). F1 (PPTC) is the over-current protection; a host drawing > 2.2 A trips the fuse, preventing the brownout that would drop the Ethernet link.
 
 ### 2.3 Data chain
 
@@ -159,4 +159,4 @@ Manufacturer: JLCPCB JLC04161H-7628 stackup, controlled impedance:
 
 - Reversible USB-C (add PI3DBS12412A SS mux) → +$1.50, full orientation reversibility
 - Active rectifiers (LT4321 ×2) → fewer thermal concerns at 802.3at upgrade
-- Upgrade to 802.3at + USB-PD 9 V — the v2 architecture (kept in git history at commit `b37ae3c…b37ae3c`)
+- Upgrade to 802.3at + USB-PD 9 V

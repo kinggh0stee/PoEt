@@ -162,7 +162,7 @@ For 5.0 V output:
 - R_UPPER / R_LOWER = 1.004 ≈ 1.0
 - Use **R_UPPER = R_LOWER = 10 kΩ 1%** → Vout = 4.99 V ✓
 
-1. Place `Device:Q_NMOS` or `Amplifier_DAC:TL431` for **U7** at **(155, 80)**:
+1. Place `Reference_Voltage:TL431` for **U7** at **(155, 80)**:
    - REF pin → midpoint of R_UPPER / R_LOWER divider
    - R_UPPER (10 kΩ): from `+5V` to REF pin
    - R_LOWER (10 kΩ): from REF pin to `GND_SEC`
@@ -172,11 +172,11 @@ For 5.0 V output:
 ### Optocoupler (U6)
 
 2. Place `Isolation:PC817x` for **U6** at **(145, 80)** — it straddles the isolation barrier:
-   - Primary (LED) side:
+   - Secondary side (LED, isolated +5 V side):
      - Anode (Pin 1) → R_OPT (560 Ω) → `+5V`
      - Cathode (Pin 2) → U7 (TL431) cathode
-   - Secondary (transistor) side:
-     - Collector (Pin 4) → Si3402-B FB pin (crosses to primary side)
+   - Primary side (transistor, GND_POE side):
+     - Collector (Pin 4) → Si3402-B FB pin
      - Emitter (Pin 3) → `GND_POE`
 
 > The optocoupler physically straddles the isolation barrier on the PCB. Its LED pins are on the secondary side; its transistor pins are on the primary side.
