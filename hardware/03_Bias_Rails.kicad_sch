@@ -1,0 +1,73 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "30000000-0000-0000-0000-000000000003")
+	(paper "A4")
+	(title_block
+		(title "PoEt — Sheet 03: Bias Rails")
+		(date "2026-05-11")
+		(rev "A")
+		(comment 1 "+3V3 (U4 AP2112K-3.3) and +1V0 (U5 RT9013-10GB) LDOs from the isolated 5 V rail")
+		(comment 2 "Both outputs feed Sheet 04 (RTL8153B I/O ring and core)")
+	)
+	(lib_symbols)
+
+	(text "SHEET 03 — BIAS RAILS"
+		(exclude_from_sim no)
+		(at 25.4 12.7 0)
+		(effects (font (size 3.0 3.0) bold) (justify left bottom))
+		(uuid "30000000-0000-0000-0000-000000001000")
+	)
+
+	(text "Place here:\n  • U4: AP2112K-3.3TRG1 (or XC6206P332MR) — 3.3 V / 600 mA LDO\n        IN → +5V | OUT → +3V3 | EN tied to +5V via 100 kΩ\n        Decoupling: 1 µF X5R on IN, 1 µF X5R on OUT\n  • U5: RT9013-10GB (or XC6206P102MR) — 1.0 V / 500 mA LDO\n        IN → +5V | OUT → +1V0 | EN tied to +5V via 100 kΩ\n        Decoupling: 1 µF X5R on IN, 1 µF X5R on OUT\n\n⚠️  Place PWR_FLAG on +3V3 and +1V0 here — exactly one per net.\n    Without PWR_FLAG, KiCad ERC reports missing power driver errors.\n\nPower budget (from design-spec.md §2.2):\n  RTL8153B I/O ring  (+3V3): ~200 mA typical\n  RTL8153B core      (+1V0): ~300 mA typical\n  Both LDOs are fed from the isolated 5 V / 2 A secondary rail (Sheet 02)."
+		(exclude_from_sim no)
+		(at 25.4 25.4 0)
+		(effects (font (size 1.27 1.27)) (justify left top))
+		(uuid "30000000-0000-0000-0000-000000001001")
+	)
+
+	(text "← +5V / GND from Sheet 02 (isolated secondary rail)"
+		(exclude_from_sim no)
+		(at 25.4 66.04 0)
+		(effects (font (size 1.27 1.27) italic) (justify left bottom))
+		(uuid "30000000-0000-0000-0000-000000002000")
+	)
+
+	(hierarchical_label "+5V" (shape input) (at 25.4 71.12 180)
+		(effects (font (size 1.524 1.524)) (justify right))
+		(uuid "30000000-0000-0000-0000-000000003001")
+	)
+	(hierarchical_label "GND" (shape passive) (at 25.4 81.28 180)
+		(effects (font (size 1.524 1.524)) (justify right))
+		(uuid "30000000-0000-0000-0000-000000003002")
+	)
+
+	(text "+3V3 / +1V0 to Sheet 04 (RTL8153B)  ➜"
+		(exclude_from_sim no)
+		(at 142.24 66.04 0)
+		(effects (font (size 1.27 1.27) italic) (justify left bottom))
+		(uuid "30000000-0000-0000-0000-000000004000")
+	)
+
+	(hierarchical_label "+3V3" (shape output) (at 180.34 71.12 0)
+		(effects (font (size 1.524 1.524)) (justify left))
+		(uuid "30000000-0000-0000-0000-000000004001")
+	)
+	(hierarchical_label "+1V0" (shape output) (at 180.34 81.28 0)
+		(effects (font (size 1.524 1.524)) (justify left))
+		(uuid "30000000-0000-0000-0000-000000004002")
+	)
+
+	(text "──── ROUTE NOTES ────\n• LDO IN caps within 2 mm of each input pin; OUT caps within 2 mm of each output pin\n• +3V3 and +1V0 are secondary-side rails — keep clear of primary PoE copper pours\n• PWR_FLAG must appear on +3V3 and +1V0 at exactly one location each; this sheet is the right place"
+		(exclude_from_sim no)
+		(at 25.4 158.75 0)
+		(effects (font (size 1.27 1.27)) (justify left top))
+		(uuid "30000000-0000-0000-0000-000000005000")
+	)
+
+	(sheet_instances
+		(path "/" (page "4"))
+	)
+	(embedded_fonts no)
+)
