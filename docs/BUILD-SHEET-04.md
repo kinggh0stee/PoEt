@@ -17,10 +17,10 @@ This is the most component-dense sheet in the project. The RTL8153B is a ~60-pin
   +1V0 ─────────────────────────────────────────────────────────────► VDD10 pins (core)
   GND ──────────────────────────────────────────────────────────────► GND pins
 
-  MDI0± ─► ESD(U8) ─────────────────────────────────────────────────► MDI_D+/- pins
-  MDI1± ─► ESD(U8) ─────────────────────────────────────────────────►    (U2 RTL8153B)
-  MDI2± ─► ESD(U9) ─────────────────────────────────────────────────►
-  MDI3± ─► ESD(U9) ─────────────────────────────────────────────────►
+  MDI0± ─► ESD(U101) ───────────────────────────────────────────────► MDI_D+/- pins
+  MDI1± ─► ESD(U101) ───────────────────────────────────────────────►    (U2 RTL8153B)
+  MDI2± ─► ESD(U102) ───────────────────────────────────────────────►
+  MDI3± ─► ESD(U102) ───────────────────────────────────────────────►
                                                                          │
                                          Y1 (25 MHz) ─────────────────► XTALIN / XTALOUT
                                          U3 (EEPROM) ─────────────────► EECS/EECLK/EEDI/EEDO
@@ -86,7 +86,7 @@ The RTL8153B requires a 25 MHz reference for its internal PLL.
 3. Place `Device:C` for **C20** (18 pF NP0 0402) between XTALIN and GND.
 4. Place `Device:C` for **C21** (18 pF NP0 0402) between XTALOUT and GND.
 
-> The 18 pF load cap value assumes a crystal with CL = 9 pF (the PCB-side loading target is CL = C_series × (C_shunt / (C_series + C_shunt))… just verify the crystal's specified CL and calculate). The reference design's value is authoritative.
+> **Load cap sizing:** the effective crystal load capacitance is `CL = (C1 × C2)/(C1 + C2) + C_stray`. With C1 = C2 = 18 pF and C_stray ≈ 3 pF (PCB), CL ≈ 12 pF. So 18 pF caps suit a crystal with CL = 12 pF. Adjust if your chosen crystal specifies a different CL (e.g., 9 pF crystal → use 12 pF load caps). The Realtek reference design's values are authoritative — use them over this approximation.
 
 Schematic annotation notes for PCB layout:
 - Place Y1 as close to XTALIN/XTALOUT as possible.
@@ -105,7 +105,7 @@ The 93C46 stores VID, PID, MAC, and strap defaults. Without it, the RTL8153B use
    - U3 DO  → U2 EEDO
    - U3 VCC → `+3V3`
    - U3 GND → `GND`
-   - U3 ORG → `GND` (selects 8-bit organisation; tie LOW for 93C46)
+   - U3 ORG → `GND` (selects 16-bit word mode; RTL8153B reads EEPROM as 64×16-bit words)
 3. Add 100 nF decoupling between U3 VCC and GND.
 4. **Add 4 test points** (TP1–TP4) on CS, CLK, DI, DO — these allow in-circuit EEPROM programming after board assembly. Name them explicitly; they're how you write the MAC address per `firmware/eeprom-image.md`.
 
@@ -118,15 +118,22 @@ The 93C46 stores VID, PID, MAC, and strap defaults. Without it, the RTL8153B use
 3. Add a 10 kΩ pull-up resistor from RST_N to `+3V3` (keeps RST_N high normally; pressing SW1 pulls it low to reset).
 4. Add a 100 nF cap from RST_N to GND for debouncing.
 
-## Step 8 — LED drivers (LED1, LED2)
+## Step 8 — LED drivers (LED1, LED2, R101, R102)
 
-The RTL8153B drives LEDs with open-drain outputs (LED0 = link, LED1 = activity).
+The RTL8153B drives LEDs with open-drain outputs (LED0 = link, LED1 = activity). Each output sinks current; the LED anode is pulled up to +3V3 through a current-limiting resistor.
 
-1. Place `Device:LED` for **LED1** (green 0603) and **LED2** (yellow 0603) at approximately **(140, 115)**.
-2. Wire:
-   - LED1 cathode → U2 LED0 pin; LED1 anode → `+3V3`
-   - LED2 cathode → U2 LED1 pin; LED2 anode → `+3V3`
-3. These nets (`LED_LINK`, `LED_ACT`) cross to Sheet 01 via hierarchical labels — connect U2 LED0 to the `LED_LINK` label, and U2 LED1 to `LED_ACT`. The current-limiting resistors (R101, R102 = 330 Ω) live on Sheet 01 near the RJ45 jack; **do not** add current-limiting resistors here.
+1. Place `Device:R` for **R101** (330 Ω 0402) between `+3V3` and a new net `LED_LINK_ANODE`.
+2. Place `Device:LED` for **LED1** (green 0603):
+   - Anode → `LED_LINK_ANODE` net (from R101)
+   - Cathode → U2 LED0 pin → `LED_LINK` hierarchical label (right edge)
+3. Place `Device:R` for **R102** (330 Ω 0402) between `+3V3` and `LED_ACT_ANODE`.
+4. Place `Device:LED` for **LED2** (yellow 0603):
+   - Anode → `LED_ACT_ANODE` net (from R102)
+   - Cathode → U2 LED1 pin → `LED_ACT` hierarchical label (right edge)
+
+The circuit is: `+3V3 → R101 → LED1 → U2 LED0 (open-drain)`. When U2 LED0 pulls low, ~9 mA flows through LED1 (3.3 V − 2.0 V forward drop) / 330 Ω ≈ 4 mA — comfortably within the RTL8153B LED sink spec.
+
+> The `LED_LINK` and `LED_ACT` labels carry the RTL8153B open-drain signals to Sheet 01, where they connect to J1's integrated LED holder pins (cathode side). On Sheet 01, J1's LED holder anodes require their own pull-up; mark J1 LED pins with NC flags if not using J1's LED holders.
 
 ## Step 9 — MDI connections
 
@@ -213,7 +220,7 @@ Expected results:
 - **QFN thermal pad**: the RTL8153B exposed pad must be connected to GND via via stitching. Most QFN footprints include this; verify.
 - **Crystal guard ring**: failure to guard the crystal on the PCB results in noise coupling from USB switching. The crystal annotation in the schematic serves as a reminder — enforce it in the PCB editor with a courtyard keep-out under Y1 and a GND copper pour ring.
 - **Strap resistors**: they must be placed before power-on. A missing strap can permanently misconfigure the chip until it is power-cycled.
-- **EEPROM ORG pin**: if the 93C46 symbol you use has an ORG pin, tie it to GND (selects byte-wide mode). Leaving it floating selects a non-standard mode.
+- **EEPROM ORG pin**: if the 93LC46 symbol you use has an ORG pin, tie it to GND (selects 16-bit word mode, as required by RTL8153B). Tying ORG to VCC selects 8-bit byte mode, which the RTL8153B does not use for EEPROM access. Leaving ORG floating causes undefined behaviour.
 - **LED polarity**: the RTL8153B LED outputs sink current (open-drain). Anode to +3V3, cathode to LED0/LED1 — not the other way around.
 - **MDI differential pair names**: different RTL8153B symbols use different pin names (BI_DA+/BI_DA-, MDI0+/MDI0-, RXDP0/RXDM0…). Match them to the pinout table in the datasheet, not the label. MDI[0] = 1000BASE-T Pair A = RJ45 pins 1, 2.
 

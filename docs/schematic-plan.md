@@ -48,7 +48,7 @@ PoE-USBC-Gigabit.kicad_sch                      ← root, sheet symbols + title 
   - `USB_SSTX+/-`, `USB_SSRX+/-` → sheet 05
   - `USB_DP`, `USB_DM` → sheet 05
   - `LED_LINK`, `LED_ACT` → sheet 01
-- **Local:** Y1 (25 MHz xtal), U3 (93C46 EEPROM), SW1 (reset), all decoupling, LEDs
+- **Local:** Y1 (25 MHz xtal), U3 (93LC46 EEPROM), SW1 (reset), all decoupling, LED1/LED2, R101/R102
 
 ### Sheet 05 — USB-C Connector
 - **In:** `+5V`, `GND`, `USB_SSTX+/-`, `USB_SSRX+/-`, `USB_DP`, `USB_DM`

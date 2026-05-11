@@ -34,14 +34,15 @@ Work through these stages in order. Each stage verifies one functional block bef
 
 **Setup:**
 - Bench PSU: 48 V DC, **current limit 150 mA**
-- Two 1N4007 diodes in series (or any 600 V / 1 A diodes) simulating Mode A pair-set
-- Connect PSU+ → diode anodes → both PAIR_A_HI and PAIR_B_HI test points
-- Connect PSU- → both PAIR_A_LO and PAIR_B_LO test points (or use a single resistor stub if no test points yet)
+- Connect PSU+ to both `PAIR_A_HI` and `PAIR_B_HI` test points (tied together — simulates DC PoE on both pair-sets simultaneously)
+- Connect PSU− to both `PAIR_A_LO` and `PAIR_B_LO` test points
+
+This drives DC through D1 and D2 bridges simultaneously, just as a PoE PSE would (the bridges are polarity-insensitive, so DC in = DC rectified on V_POE+). If your board has no test points on the PAIR lines yet, skip to Stage 2 and use a real PoE switch.
 
 **Procedure:**
 1. Set current limit, then apply 48 V.
-2. Measure V_POE+ to GND_POE — expect **46–48 V** (two diode drops below supply).
-3. Check current draw — expect **< 30 mA** at idle (Si3402-B detection resistor current + quiescent).
+2. Measure V_POE+ to GND_POE — expect **47–48 V** (one Schottky bridge diode drop from each pair-set).
+3. Check current draw — expect **< 20 mA** at idle (Si3402-B detection resistor quiescent current only; flyback is not running).
 4. Measure Si3402-B `PWOK` pin — if exposed on a test point, it should go high after ~80 ms as detection completes.
 5. **Do not expect +5V yet** — Si3402-B's flyback won't run without a valid PoE PD detection sequence from a real PSE.
 
@@ -63,7 +64,7 @@ Work through these stages in order. Each stage verifies one functional block bef
 2. Watch the switch's per-port PoE LED — it should go green within 2–3 seconds (detection + classification complete).
 3. Measure V_POE+ — expect **36–57 V** depending on cable length and PSE output.
 4. Measure +5V to GND — expect **4.9–5.1 V**.
-5. Measure current on switch port — expect **150–500 mA at 48 V** (idle, no USB load).
+5. Measure current on switch port — expect **30–150 mA at 48 V** (idle, no USB host connected). At full USB load this rises to ~270 mA (12.95 W / 48 V).
 
 **If the switch doesn't grant power:**
 - Measure RDET resistor (R1): should be 24.9 kΩ ± 1 %
@@ -123,9 +124,7 @@ If a rail is missing: check EN pull-up resistors (Sheet 03), check input bypass 
 **Goal:** Gigabit Ethernet link established.
 
 **Procedure:**
-1. Plug Ethernet cable from J1 into the PoE switch (same cable providing PoE).
-
-   > If the switch doesn't support in-band data + PoE on the same port at the same time (most do), use a second port for data and a PoE injector for power.
+1. The same PoE switch port that is powering the board also carries Ethernet data — this is normal 802.3af operation. Plug J1 into the same switch port that is already granting PoE power.
 
 2. `ip link show eth0` — should show `state UP` after a few seconds.
 3. `ethtool eth0` — confirm `Speed: 1000Mb/s, Duplex: Full`.

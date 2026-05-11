@@ -21,7 +21,7 @@ Source: `drivers/net/usb/r8152.c` (Linux kernel, open-source), cross-referenced 
 | 0x04 | 2 | USB PID | `0x53 0x81` | 0x8153 (LE); `r8152` driver binds to this |
 | 0x06 | 6 | MAC address | `02 00 5E xx xx xx` | See MAC allocation section |
 | 0x0C | 1 | USB bcdDevice lo | `0x00` | Device release number, lo byte *(inferred)* |
-| 0x0D | 1 | USB bcdDevice hi | `0x30` | Device release number, hi byte → 0x0300 *(inferred)* |
+| 0x0D | 1 | USB bcdDevice hi | `0x30` | Device release number, hi byte → 0x3000 (BCD 30.00) *(inferred)* |
 | 0x0E | 1 | MaxPower | `0x00` | In 2 mA units. `0x00` = self-powered (we draw from PoE) |
 | 0x0F | 1 | Config flags | `0x20` | Bit 5 = self-powered; bit 0 = remote wakeup *(inferred)* |
 | 0x10 | 1 | LED config | `0x07` | Default: LED0 = LINK, LED1 = ACT, LED2 = off *(inferred)* |

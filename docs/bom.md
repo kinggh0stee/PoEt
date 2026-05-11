@@ -13,7 +13,7 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 | U5 | 1 | 1.0 V LDO (RTL8153B core) | 500 mA fixed 1.0 V | RT9013-10GB | LCSC C47773 |
 | U6 | 1 | Optocoupler | Si3402-B feedback isolation | PC817B | LCSC C7440 |
 | U7 | 1 | Shunt regulator | TL431 reference | TL431ASN | LCSC C7831 |
-| U8, U9 | 2 | ESD protection (MDI) | 4-line TVS array — Sheet 01, MDI0±–MDI3± | NUP4202W1T1G | Digi-Key |
+| U101, U102 | 2 | ESD protection (MDI) | 4-line TVS array — Sheet 01, MDI0±–MDI3± | NUP4202W1T1G | Digi-Key |
 | U10 | 1 | ESD protection (USB-C) | 4-line TVS array — Sheet 05, SS pair + D+/D- | NUP4202W1T1G | Digi-Key |
 
 ## Magnetics & connectors
@@ -76,7 +76,7 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 
 | Category | Single qty | 1k qty |
 |---|---|---|
-| Critical ICs (U1–U10) | $9.75 | $5.65 |
+| Critical ICs (U1–U7, U10, U101, U102) | $9.75 | $5.65 |
 | Magnetics (J1, T1, L1, L2) | $5.20 | $2.80 |
 | USB-C receptacle | $0.80 | $0.35 |
 | Passives (~80 parts) | $4.00 | $1.20 |

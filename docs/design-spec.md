@@ -65,7 +65,7 @@ Feedback: TL431 + PC817B optocoupler across isolation barrier (standard pattern;
 
 | Stage | In | Out | Loss | η |
 |---|---|---|---|---|
-| Cable + RJ45 (Cat5e, 30 m) | 13 W @ PSE | 12.95 W @ PD | < 0.1 W | ~99 % (af cable budget allows up to 12.95 W loss tolerance) |
+| Cable + RJ45 (Cat5e, 30 m) | 13 W @ PSE | 12.95 W @ PD | < 0.1 W | ~99 % — IEEE 802.3af guarantees ≥ 12.95 W at the PD; actual cable loss is < 0.1 W for 30 m Cat5e |
 | Schottky bridges | 12.95 W | 12.45 W | 0.5 W | 96 % |
 | Si3402-B + flyback (target 85 %) | 12.45 W | 10.6 W | 1.85 W | 85 % |
 | 5 V rail to RTL8153B | — | ~1.5 W internal load | — | — |

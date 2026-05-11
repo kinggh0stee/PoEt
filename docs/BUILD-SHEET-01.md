@@ -101,13 +101,18 @@ Each transformer's primary side has a center tap (the midpoint of the cable-side
 
 ## Step 5 — LEDs (LED_LINK, LED_ACT)
 
-Most integrated mag jacks have built-in LED holders driven by the PHY:
+The `LED_LINK` and `LED_ACT` signals come from Sheet 04, where the RTL8153B open-drain outputs drive LED1/LED2 (with R101/R102 current-limiting resistors already in place). The signals arriving on this sheet are the **cathode-side** driven signals (low = LED on).
 
-1. The RTL8153B drives `LED_LINK` and `LED_ACT` from Sheet 04. Those nets arrive on this sheet via the corresponding hierarchical labels (note: they're typed `input` on Sheet 01, since the signal flows in from another sheet).
-2. Wire `LED_LINK` and `LED_ACT` directly to the LED pins of J1.
-3. The LED anodes (+) typically pull up to a sheet-local +3V3. Add a power flag if needed, plus current-limiting resistors (R101, R102 = 330 Ω) in series with each LED.
+**If your magjack has integrated LED holders (e.g., Bel Fuse 0826-1G1T-DV-F):**
 
-If your magjack doesn't have integrated LEDs, instead place 2× standalone LEDs near the RJ45 cutout in the enclosure (you'd add LED1, LED2 here and wire them to LED_LINK/LED_ACT through resistors).
+1. Wire `LED_LINK` → J1 LED holder pin 1 cathode (the sinking side).
+2. Wire `LED_ACT` → J1 LED holder pin 2 cathode.
+3. The LED holder anodes (+) need a pull-up. Since Sheet 01 has no +3V3 label, the simplest option is to add a small resistor (330 Ω) from `+5V` to each LED anode — or leave J1 LED pins as **No Connect** (NC flags) and rely solely on the discrete LED1/LED2 on Sheet 04 for link/act indication.
+
+**If your magjack has no LED holders (or you want only the discrete LEDs on Sheet 04):**
+
+1. Add explicit `No Connect` flags (`X` key) on J1's LED anode and cathode pins.
+2. LED_LINK and LED_ACT labels on this sheet will remain unconnected to J1 — that is fine; the hierarchical label is a one-way driver from Sheet 04 and ERC will not error on an unused input label as long as it is wired at the source.
 
 ## Step 6 — Chassis ground
 
