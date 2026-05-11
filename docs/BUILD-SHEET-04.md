@@ -118,20 +118,20 @@ The 93C46 stores VID, PID, MAC, and strap defaults. Without it, the RTL8153B use
 3. Add a 10 kΩ pull-up resistor from RST_N to `+3V3` (keeps RST_N high normally; pressing SW1 pulls it low to reset).
 4. Add a 100 nF cap from RST_N to GND for debouncing.
 
-## Step 8 — LED drivers (LED1, LED2, R101, R102)
+## Step 8 — LED drivers (LED1, LED2, R401, R402)
 
 The RTL8153B drives LEDs with open-drain outputs (LED0 = link, LED1 = activity). Each output sinks current; the LED anode is pulled up to +3V3 through a current-limiting resistor.
 
-1. Place `Device:R` for **R101** (330 Ω 0402) between `+3V3` and a new net `LED_LINK_ANODE`.
+1. Place `Device:R` for **R401** (330 Ω 0402) between `+3V3` and a new net `LED_LINK_ANODE`.
 2. Place `Device:LED` for **LED1** (green 0603):
-   - Anode → `LED_LINK_ANODE` net (from R101)
+   - Anode → `LED_LINK_ANODE` net (from R401)
    - Cathode → U2 LED0 pin → `LED_LINK` hierarchical label (right edge)
-3. Place `Device:R` for **R102** (330 Ω 0402) between `+3V3` and `LED_ACT_ANODE`.
+3. Place `Device:R` for **R402** (330 Ω 0402) between `+3V3` and `LED_ACT_ANODE`.
 4. Place `Device:LED` for **LED2** (yellow 0603):
-   - Anode → `LED_ACT_ANODE` net (from R102)
+   - Anode → `LED_ACT_ANODE` net (from R402)
    - Cathode → U2 LED1 pin → `LED_ACT` hierarchical label (right edge)
 
-The circuit is: `+3V3 → R101 → LED1 → U2 LED0 (open-drain)`. When U2 LED0 pulls low, ~9 mA flows through LED1 (3.3 V − 2.0 V forward drop) / 330 Ω ≈ 4 mA — comfortably within the RTL8153B LED sink spec.
+The circuit is: `+3V3 → R401 → LED1 → U2 LED0 (open-drain)`. When U2 LED0 pulls low, ~9 mA flows through LED1 (3.3 V − 2.0 V forward drop) / 330 Ω ≈ 4 mA — comfortably within the RTL8153B LED sink spec.
 
 > The `LED_LINK` and `LED_ACT` labels carry the RTL8153B open-drain signals to Sheet 01, where they connect to J1's integrated LED holder pins (cathode side). On Sheet 01, J1's LED holder anodes require their own pull-up; mark J1 LED pins with NC flags if not using J1's LED holders.
 

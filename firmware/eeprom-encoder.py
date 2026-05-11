@@ -4,13 +4,18 @@ RTL8153B EEPROM encoder — PoEt project
 Usage: python3 eeprom-encoder.py <config.yaml> [output.bin]
 Output: 128-byte binary suitable for 93LC46 (PoEt U3)
 
+Requires: PyYAML  (pip install PyYAML  or  pip install -r requirements.txt)
+
 Byte layout per eeprom-image.md. Fields not set by the YAML are left 0xFF
 (93LC46 erased state). Consult RTL8153B datasheet for reserved/inferred fields.
 """
 
 import sys
 import struct
-import yaml
+try:
+    import yaml
+except ImportError:
+    sys.exit("PyYAML is required: pip install PyYAML  (or: pip install -r requirements.txt)")
 
 
 EEPROM_SIZE = 128

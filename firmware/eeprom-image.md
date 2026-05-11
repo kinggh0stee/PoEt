@@ -47,15 +47,55 @@ Use a locally-administered MAC range until/unless an OUI is purchased:
 
 ## Programming
 
-Two options:
+Three options, in order of preference:
 
-### Option A — preprogram before assembly
-Order the EEPROM with a serial number range from the distributor (most carry programmable EEPROMs on demand). Simplest for low volumes.
+### Option A — Realtek USB programmer (easiest, preferred)
 
-### Option B — in-circuit program after assembly
-Add 4 test points on the EEPROM lines (CS, CLK, DI, DO) and program through them with a Bus Pirate, FT232H, or a Pi Pico running a MicroWire master.
+Once the board enumerates over USB (even with wrong VID/PID), Realtek's `r8153_fw_tool` or `RTL8153B_EEPROM_Programmer.exe` (Windows) can write the EEPROM through the RTL8153B's own interface — no soldering, no Bus Pirate needed.
 
-Realtek provides `RTL8153B_EEPROM_Programmer.exe` (Windows) that talks to the chip via USB and writes the EEPROM through the RTL8153B's own SMI-style interface — this is the easiest way at production. Run on a Windows test fixture as part of board test.
+```sh
+# Linux (open-source rtl8153-fw-tool if available):
+sudo ./r8153_fw_tool --write eeprom-default.bin
+
+# Windows: run RTL8153B_EEPROM_Programmer.exe, select device, load .bin, click Write
+```
+
+If the chip doesn't enumerate at all (e.g., bad EEPROM content causing boot failure), fall back to Option B.
+
+### Option B — In-circuit via test points TP1–TP4 (Bus Pirate / FT232H)
+
+Connect to TP1=CS, TP2=CLK, TP3=DI, TP4=DO. Power the board normally (PoE or bench PSU). The 93LC46 runs at 3.3 V (U3 VCC tied to +3V3 rail).
+
+**Key parameters:**
+- Interface: MicroWire (SPI mode 0, CPOL=0, CPHA=0), MSB first
+- Word size: **16-bit** (ORG tied to GND → 64 words × 16 bits)
+- Clock speed: ≤ 3 MHz (conservative; 1 MHz is fine)
+- CS is active-**high** (unlike most SPI devices which are active-low)
+
+**Bus Pirate setup (RAWWIRE mode):**
+```
+HiZ> m
+...select 5 (RAWWIRE)...
+Raw wire mode: CLK idle low, data sampled on rising edge, MSB first
+Speed: 1MHz
+CS: active high
+```
+
+**Programming sequence per word (address 0 to 63):**
+
+1. **Enable erase/write** (EWEN, send once before any write):
+   - CS high → clock out: `1 1 00 000000` (9 bits: start=1, op=11, addr=00xxxxxx) → CS low
+2. **Write word at address N** (repeat for all 64 words):
+   - CS high → clock out: `1 01 AAAAAA DDDDDDDDDDDDDDDD` (1 start + 2 op + 6 addr + 16 data bits) → CS low
+   - Poll DO: wait for DO to go high (write complete, typically < 10 ms)
+3. **Disable erase/write** (EWDS) when done:
+   - CS high → clock out: `1 0 00 000000` (9 bits) → CS low
+
+**Practical note:** Most Bus Pirate users script this in Python using `pyserial` to send the raw bit sequences. A sample script is straightforward but board-specific — write one based on the `eeprom-default.bin` output from `eeprom-encoder.py`, reading 2 bytes at a time (little-endian) as each 16-bit word to program.
+
+### Option C — Pre-program before assembly
+
+Order the 93LC46 from a distributor that offers custom-programmed EEPROMs (e.g., Digi-Key or Arrow programming services), supply the `.bin` file. Simplest for larger quantities where programming every board individually is impractical.
 
 ## Reference
 

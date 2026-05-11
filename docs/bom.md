@@ -39,11 +39,12 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 | R1 | 1 | 24.9 kΩ 1 % | RDET | Detection signature |
 | R2 | 1 | 12.1 kΩ 1 % | RCLS | Class 3 (6.49–12.95 W) — verify per Si3402-B Table 4 |
 
-## Discretes — secondary side (USB)
+## Discretes — secondary side (PoE → 5 V)
 
 | Ref | Qty | Value | Type | Notes |
 |---|---|---|---|---|
 | D4 | 1 | SS34 (or PMEG6020) | Schottky 60 V / 3 A | Secondary rectifier |
+| R3 | 1 | 470 Ω 1/16 W 0402 | Current-limiting | LED3 power indicator (Sheet 02, +5V → R3 → LED3 → GND) |
 | C10 | 1 | 220 µF / 16 V | Polymer low-ESR | Secondary bulk |
 | C11–C13 | 3 | 22 µF / 10 V | X5R 1210 | VBUS bulk at USB-C connector |
 | C14 | 1 | 100 nF / 16 V | X7R 0402 | High-freq bypass at VBUS |
@@ -55,19 +56,20 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 
 | Ref | Qty | Value | Notes |
 |---|---|---|---|
-| Y1 | 1 | 25 MHz ±25 ppm crystal | 5×3.2 mm SMD |
+| Y1 | 1 | 25 MHz ±25 ppm crystal, **CL = 12 pF** | 5×3.2 mm or 3.2×2.5 mm SMD — e.g. EPSON FA-128 25.0000MF12X, ABM8-25.000MHZ-B2-T (verify CL against RTL8153B ref design) |
 | C20, C21 | 2 | 18 pF NP0 0402 | Crystal load (verify per crystal CL) |
 | C22–C40 | ~15 | 100 nF 0402 X7R | Decoupling per RTL8153B power pin |
 | C41–C44 | 4 | 10 µF 0603 X5R | Bulk decoupling |
 | R20–R25 | 6 | bias/strap resistors | per RTL8153B reference design |
+| R401, R402 | 2 | 330 Ω 1/16 W 0402 | LED1/LED2 current-limiting (Sheet 04, in series with RTL8153B LED0/LED1 open-drain outputs) |
 
 ## LEDs / user interface
 
 | Ref | Qty | Part | Color | Function |
 |---|---|---|---|---|
-| LED1 | 1 | green 0603 | GREEN | LINK (RTL8153B LED0) |
-| LED2 | 1 | yellow 0603 | YELLOW | ACT (RTL8153B LED1) |
-| LED3 | 1 | blue 0603 | BLUE | PWR (5 V rail healthy) |
+| LED1 | 1 | green 0603 | GREEN | LINK — Sheet 04, driven by RTL8153B LED0 via R401 |
+| LED2 | 1 | yellow 0603 | YELLOW | ACT — Sheet 04, driven by RTL8153B LED1 via R402 |
+| LED3 | 1 | blue 0603 | BLUE | PWR (5 V rail present) — Sheet 02, driven by +5V rail via R3 |
 | SW1 | 1 | tact switch SMD | — | Reset (pulls RTL8153B RST_N low) |
 
 ---

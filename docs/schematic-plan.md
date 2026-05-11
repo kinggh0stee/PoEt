@@ -29,7 +29,7 @@ PoE-USBC-Gigabit.kicad_sch                      ← root, sheet symbols + title 
 - **Out:**
   - `+5V` (secondary, isolated) → sheet 03, sheet 05
   - `GND` (== secondary GND, isolated from primary `GND_POE`) → all secondary sheets
-- **Components:** D1, D2 bridges; bulk caps; Si3402-B (U1); flyback xfmr T1; secondary rectifier D4; output bulk; opto U6 + TL431 U7; Y-cap C3 across barrier.
+- **Components:** D1, D2 bridges; bulk caps; Si3402-B (U1); flyback xfmr T1; secondary rectifier D4; output bulk; opto U6 + TL431 U7; Y-cap C3 across barrier; LED3 power indicator + R3 (470 Ω) on secondary side.
 
 ⚠️ Place a **net tie** for the Y-cap between `GND_POE` and `GND` so ERC tolerates the deliberate connection.
 
@@ -48,7 +48,7 @@ PoE-USBC-Gigabit.kicad_sch                      ← root, sheet symbols + title 
   - `USB_SSTX+/-`, `USB_SSRX+/-` → sheet 05
   - `USB_DP`, `USB_DM` → sheet 05
   - `LED_LINK`, `LED_ACT` → sheet 01
-- **Local:** Y1 (25 MHz xtal), U3 (93LC46 EEPROM), SW1 (reset), all decoupling, LED1/LED2, R101/R102
+- **Local:** Y1 (25 MHz xtal), U3 (93LC46 EEPROM), SW1 (reset), all decoupling, LED1/LED2, R401/R402
 
 ### Sheet 05 — USB-C Connector
 - **In:** `+5V`, `GND`, `USB_SSTX+/-`, `USB_SSRX+/-`, `USB_DP`, `USB_DM`

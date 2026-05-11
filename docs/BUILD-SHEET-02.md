@@ -199,7 +199,19 @@ Connect the 6 hierarchical labels:
 - Right: `+5V` → cathode of D4 / positive rail
 - Right: `GND` → `GND_SEC` (secondary ground)
 
-## Step 12 — Run ERC
+## Step 12 — Power indicator LED (LED3, R3)
+
+The +5V secondary rail should have a visible power-good indicator. This is the only place in the design where the +5V rail is generated, so this is the natural home for LED3.
+
+1. Place `Device:R` for **R3** (470 Ω 1/16 W 0402) with one end on `+5V` and the other end on a local net `LED3_ANODE`.
+2. Place `Device:LED` for **LED3** (blue 0603):
+   - Anode → `LED3_ANODE`
+   - Cathode → `GND` (== `GND_SEC`)
+3. Place at approximately **(155, 55)** — clearly on the secondary side of the isolation barrier.
+
+The circuit is `+5V → R3 (470 Ω) → LED3 → GND_SEC`. At 5 V with a blue LED (V_F ≈ 3.0 V), this draws ~4 mA — visible but not a meaningful extra load on the 10 W output.
+
+## Step 13 — Run ERC
 
 Expected results:
 - 0 errors ideally
@@ -216,6 +228,7 @@ Expected results:
 - ✅ All Si3402-B pins are either connected or explicitly NC
 - ✅ Transformer dot notation is correct
 - ✅ TL431 REF pin voltage divider calculates to ≈ 5.0 V
+- ✅ LED3 (blue) + R3 (470 Ω) placed on secondary side; anode at +5V through R3, cathode to GND_SEC
 - ✅ Every component has Reference + Footprint assigned
 
 ## Gotchas
