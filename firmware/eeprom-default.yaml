@@ -1,0 +1,26 @@
+# RTL8153B EEPROM configuration — PoEt Rev A defaults
+# Run: python3 eeprom-encoder.py eeprom-default.yaml
+# Output: eeprom-default.bin (128 bytes)
+#
+# To program a board:
+#   Option A: Realtek EEPROM Programmer (Windows, via USB after board enumerates)
+#   Option B: Bus Pirate / FT232H on TP1-TP4 test points (MicroWire 3-wire, CS+CLK+DI+DO)
+
+vid: 0x0BDA          # Realtek — keeps r8152 driver auto-binding
+pid: 0x8153          # RTL8153 — exactly as in Linux kernel ID table
+
+# MAC: locally-administered, first octet 0x02.
+# Replace xx:xx:xx with a unique 24-bit board serial for each unit.
+# For production, use a purchased OUI (see eeprom-image.md §MAC address allocation).
+mac: "02:00:5E:00:00:01"
+
+self_powered: true   # We draw power from PoE, not from the USB host
+max_power_ma: 0      # Only meaningful when self_powered is false
+
+led_config: 0x07     # LED0=LINK, LED1=ACT, LED2=off (RTL8153B default)
+
+# String descriptors — leave blank to use RTL8153B ROM strings ("Realtek" / "USB 10/100/1000 LAN")
+# Uncomment to override:
+# manufacturer: "gh0stee.com"
+# product: "PoEt USB-C Gigabit Adapter"
+# serial: ""         # leave empty; MAC is the real unique identifier

@@ -1,0 +1,102 @@
+(version 1)
+
+# PoEt — Custom DRC Rules
+# KiCad 8 constraint expression language
+# Run: PCB Editor → Inspect → Design Rules Checker
+
+# ─── Isolation barrier ────────────────────────────────────────────────────────
+# IEEE 802.3 requires ≥ 4.0 mm creepage and clearance between the PoE primary
+# side and the isolated USB secondary side. This rule catches any copper violation
+# across that gap. GND_POE and V_SW are in the POE_PRIMARY netclass.
+
+(rule "PoE_isolation_4mm"
+   (constraint clearance (min 4.0mm))
+   (condition "A.NetClass == 'POE_PRIMARY' && B.NetClass != 'POE_PRIMARY'")
+)
+
+(rule "PoE_isolation_4mm_reverse"
+   (constraint clearance (min 4.0mm))
+   (condition "A.NetClass != 'POE_PRIMARY' && B.NetClass == 'POE_PRIMARY'")
+)
+
+# ─── USB 3.2 Gen 1 SuperSpeed differential pair ────────────────────────────────
+# Target: 90 Ω differential impedance on JLCPCB JLC04161H-7628 stackup
+# F.Cu over solid In1.Cu GND plane: 0.15 mm trace, 0.13 mm gap
+
+(rule "USB3_SS_track_width"
+   (constraint track_width (min 0.13mm) (max 0.18mm))
+   (condition "A.NetClass == 'USB3_SS'")
+)
+
+(rule "USB3_SS_diff_pair_gap"
+   (constraint differential_pair_gap (min 0.11mm) (max 0.16mm))
+   (condition "A.NetClass == 'USB3_SS'")
+)
+
+(rule "USB3_SS_via_count"
+   (constraint via_count (max 2))
+   (condition "A.NetClass == 'USB3_SS'")
+)
+
+(rule "USB3_SS_length_match"
+   (constraint skew (max 0.1mm))
+   (condition "A.NetClass == 'USB3_SS' && B.NetClass == 'USB3_SS'")
+)
+
+# ─── Ethernet MDI differential pairs ──────────────────────────────────────────
+# Target: 100 Ω differential impedance
+# F.Cu over In1.Cu GND plane: 0.25 mm trace, 0.20 mm gap
+
+(rule "MDI_track_width"
+   (constraint track_width (min 0.22mm) (max 0.28mm))
+   (condition "A.NetClass == 'ETHERNET_MDI'")
+)
+
+(rule "MDI_diff_pair_gap"
+   (constraint differential_pair_gap (min 0.17mm) (max 0.23mm))
+   (condition "A.NetClass == 'ETHERNET_MDI'")
+)
+
+(rule "MDI_intra_pair_length_match"
+   (constraint skew (max 0.5mm))
+   (condition "A.NetClass == 'ETHERNET_MDI' && B.NetClass == 'ETHERNET_MDI'")
+)
+
+# ─── PoE primary power traces ──────────────────────────────────────────────────
+# Primary side carries up to 350 mA DC + flyback switching transients.
+# Minimum 0.5 mm track width for current handling; wider preferred.
+
+(rule "POE_PRIMARY_track_width"
+   (constraint track_width (min 0.5mm))
+   (condition "A.NetClass == 'POE_PRIMARY'")
+)
+
+# ─── 5 V secondary power traces ────────────────────────────────────────────────
+# Secondary rail delivers up to 2 A to VBUS. 0.4 mm minimum.
+
+(rule "POWER_5V_track_width"
+   (constraint track_width (min 0.4mm))
+   (condition "A.NetClass == 'POWER_5V'")
+)
+
+# ─── Edge clearance ────────────────────────────────────────────────────────────
+# Keep all copper at least 0.3 mm from board edge to prevent delamination
+# and exposure during depanelization.
+
+(rule "edge_clearance"
+   (constraint edge_clearance (min 0.3mm))
+)
+
+# ─── Courtyard clearance ───────────────────────────────────────────────────────
+
+(rule "courtyard_clearance"
+   (constraint courtyard_clearance (min 0.1mm))
+)
+
+# ─── Minimum via drill ─────────────────────────────────────────────────────────
+# JLCPCB standard: 0.2 mm drill (0.45 mm annular ring).
+# Microvia (laser) not used in this design.
+
+(rule "min_via_drill"
+   (constraint hole_size (min 0.2mm))
+)

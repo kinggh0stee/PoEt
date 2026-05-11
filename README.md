@@ -88,10 +88,14 @@ PoEt/
 │   ├── BUILD-SHEET-02.md              ← step-by-step guide for Sheet 02
 │   ├── BUILD-SHEET-03.md              ← step-by-step guide for Sheet 03
 │   ├── BUILD-SHEET-04.md              ← step-by-step guide for Sheet 04
-│   └── BUILD-SHEET-05.md              ← step-by-step guide for Sheet 05
+│   ├── BUILD-SHEET-05.md              ← step-by-step guide for Sheet 05
+│   ├── FABRICATION.md                 ← gerber export + JLCPCB order guide
+│   └── BRING-UP.md                    ← staged power-on test procedure
 ├── fabrication/                        ← gerbers + assembly files (KiCad-generated, not in repo)
 └── firmware/
-    └── eeprom-image.md                ← RTL8153B EEPROM layout (VID/PID/MAC)
+    ├── eeprom-image.md                ← RTL8153B EEPROM byte layout
+    ├── eeprom-default.yaml            ← default EEPROM config (VID/PID/MAC)
+    └── eeprom-encoder.py              ← generates .bin from YAML config
 ```
 
 ## Getting Started
@@ -100,6 +104,7 @@ PoEt/
 2. Read `docs/design-spec.md` — note the 4 mm creepage rule between the PoE primary and USB secondary
 3. Order parts per `docs/bom.md`
 4. The schematic is split into 5 hierarchical sheets — see `docs/schematic-plan.md`
+5. When boards arrive, follow `docs/BRING-UP.md` for the staged power-on procedure
 
 ## License
 

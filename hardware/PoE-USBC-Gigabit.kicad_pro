@@ -133,6 +133,8 @@
       {"netclass": "USB3_SS", "pattern": "USB_SS*"},
       {"netclass": "ETHERNET_MDI", "pattern": "MDI*"},
       {"netclass": "POE_PRIMARY", "pattern": "V_POE*"},
+      {"netclass": "POE_PRIMARY", "pattern": "V_SW"},
+      {"netclass": "POE_PRIMARY", "pattern": "GND_POE"},
       {"netclass": "POE_PRIMARY", "pattern": "PAIR_*"},
       {"netclass": "POWER_5V", "pattern": "+5V"},
       {"netclass": "POWER_5V", "pattern": "VBUS"}
