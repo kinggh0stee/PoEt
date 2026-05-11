@@ -58,7 +58,7 @@ Single-chip PoE PD (Si3402-B handles detect, classify, hot-swap, and flyback con
 | PoE input | IEEE 802.3af Type 1 (Class 0 advertisement, ≤12.95 W at PD) |
 | Ethernet | 10 / 100 / 1000 BASE-T full duplex, auto MDI/MDIX |
 | USB output | USB 3.2 Gen 1 (5 Gbps), Type-C, single-orientation SS |
-| USB-C power role | Source, 5 V / 2 A (10 W advertised via 22 kΩ Rp on CC) |
+| USB-C power role | Source, 5 V / 2 A output; CC Rp = 22 kΩ → 1.5 A advertised (7.5 W) |
 | Isolation | 1500 Vrms (PoE side to USB side) |
 | Target dimensions | ~60 × 30 mm, 4-layer board |
 | Operating temp | 0 – 50 °C |

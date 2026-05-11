@@ -70,15 +70,14 @@ These tell the PSE what power class the PD is.
 
 **Class table** (for reference — R2 sets the class):
 
-| Class | Power at PD | R2 value |
+| Class | Max power at PD | RCLS (R2) value |
 |---|---|---|
-| 0 | ≤15.4 W | no resistor (open) |
-| 1 | 4 W | 137 kΩ |
-| 2 | 7 W | 75 kΩ |
-| 3 | 15.4 W | 43.2 kΩ |
-| **4** | **12.95 W** | **12.1 kΩ** ← we use this |
+| 0 | 12.95 W (default, unclassified) | open (omit R2) |
+| 1 | 3.84 W | 137 kΩ |
+| 2 | 6.49 W | 75 kΩ |
+| **3** | **12.95 W** | **12.1 kΩ ← we use this** |
 
-> Note: Class 4 requires dual-event classification in 802.3at; Si3402-B handles this automatically on the RCLS pin. Follow AN1004 Section 4 for exact procedure.
+> Note: Classes 0–3 are defined in IEEE 802.3af. Class 3 explicitly requests 12.95 W from the PSE; Class 0 also allows up to 12.95 W but is unclassified. Using Class 3 ensures managed switches reserve the full power budget for this port. Verify R2 against Si3402-B AN1004 Table 4 before ordering.
 
 ## Step 4 — Place Si3402-B (U1)
 
@@ -140,15 +139,15 @@ Now working on the right side of the isolation barrier:
 
 > At this point `+5V` should be a well-defined net tied to the cathode of D4 and the positive terminal of all secondary caps.
 
-## Step 8 — Y-cap (C14)
+## Step 8 — Y-cap (C3)
 
 The Y-cap provides a high-frequency return path for common-mode noise across the isolation barrier.
 
-1. Place `Device:C` for **C14** (1 nF / 2 kV rated):
+1. Place `Device:C` for **C3** (1 nF / 2 kV rated):
    - One terminal → `GND_POE` (primary ground)
    - Other terminal → `GND_SEC` (secondary ground)
 2. In the schematic, this creates a deliberate connection between two otherwise-isolated nets. Add a **Net Tie** symbol (KiCad: `Device:Net_Tie_2`) in series or add a note suppressing the ERC "different net" warning for this junction.
-3. On the PCB, C14 must physically straddle the isolation cut slot and be rated for the full isolation voltage (the 2 kV cap handles PoE surge voltages with margin).
+3. On the PCB, C3 must physically straddle the isolation cut slot and be rated for the full isolation voltage (the 2 kV cap handles PoE surge voltages with margin).
 
 ## Step 9 — Feedback network (U6, U7 + resistors)
 
@@ -204,7 +203,7 @@ Connect the 6 hierarchical labels:
 
 Expected results:
 - 0 errors ideally
-- 1 "different net names connected" warning → the Y-cap C14 joining GND_POE and GND_SEC — suppress with a Net Tie footprint
+- 1 "different net names connected" warning → the Y-cap C3 joining GND_POE and GND_SEC — suppress with a Net Tie footprint
 - Possible "unconnected pin" warnings on Si3402-B if PWOK / SYNC / SD are not wired → add explicit NC flags
 
 ## ERC checklist before marking complete
@@ -213,7 +212,7 @@ Expected results:
 - ✅ Both bridges (D1, D2) are fully wired
 - ✅ V_POE+ and GND_POE are clearly separate nets from +5V and GND_SEC
 - ✅ Isolation barrier marked with graphical line
-- ✅ C14 Y-cap has a net tie symbol (no bare ERC error)
+- ✅ C3 Y-cap has a net tie symbol (no bare ERC error)
 - ✅ All Si3402-B pins are either connected or explicitly NC
 - ✅ Transformer dot notation is correct
 - ✅ TL431 REF pin voltage divider calculates to ≈ 5.0 V
@@ -225,4 +224,4 @@ Expected results:
 - **Optocoupler primary/secondary**: it's easy to place U6 with both sides on the same GND. Confirm the collector/emitter side is on `GND_POE` and the LED side is on `GND_SEC`.
 - **RCLS vs RDET**: these are different pins. RDET sets the 25 kΩ detection signature (always 24.9 kΩ). RCLS is class-specific.
 - **Compensation network**: wrong COMP values cause oscillation or sluggish regulation. Use AN1004 Table 2 values verbatim for the 750313638 transformer. Recalculate only if substituting a different transformer.
-- **Two separate GND symbols**: use `GND_POE` power symbol on the primary side and `GND` (or `GND_SEC`) on the secondary side. Never connect them directly — only via C14 net tie.
+- **Two separate GND symbols**: use `GND_POE` power symbol on the primary side and `GND` (or `GND_SEC`) on the secondary side. Never connect them directly — only via C3 net tie.

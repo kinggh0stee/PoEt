@@ -48,6 +48,7 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 | C14 | 1 | 100 nF / 16 V | X7R 0402 | High-freq bypass at VBUS |
 | C15, C16 | 2 | 100 nF / 16 V | X7R 0402 | USB SS AC-coupling on TX pair |
 | **R10, R11** | 2 | **22 kΩ 1 %** | 0402 | Rp on CC1, CC2 → 5 V (advertise 1.5 A) |
+| F1 | 1 | 2 A / 6 V PPTC | Resettable fuse | VBUS over-current protection; Bourns MF-MSMF200/33X-2 or TE MICROSMD200F-2 |
 
 ## RTL8153B support
 
@@ -90,3 +91,4 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 - **RTL8153B** — had supply issues 2023–2024. Drop-ins: ASIX AX88179B (different footprint, recompile EEPROM), Microchip LAN7800 (different driver).
 - **Flyback transformer** — must be matched to the chosen PD controller's reference design (turns ratio, leakage L, isolation rating). Don't sub blindly.
 - **RJ45 magnetics** — must be PoE-rated. Non-PoE jacks fail at the center-tap current.
+- **F1 (PPTC fuse)** — protects against host over-draw on VBUS (>2.2 A causes a clean shutoff instead of a brownout). Any 2 A / 6 V PPTC in a 1206 footprint works. If substituting a TPS25940 eFuse for active limiting, update R2 and connect PG/EN per TPS25940 datasheet.

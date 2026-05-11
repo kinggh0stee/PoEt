@@ -36,7 +36,7 @@ Rev A · 2026-05 · v3 (simplified to match Ubiquiti UACC-Adapter-PoE-USBC)
 
 ### 1.4 Isolation
 - **Primary (PoE) ↔ Secondary (USB):** 1500 Vrms, 1 minute (per IEEE 802.3)
-- **Isolation barrier crosses:** flyback transformer T1, optocoupler U6, RJ45 magnetics, Y-cap C14
+- **Isolation barrier crosses:** flyback transformer T1, optocoupler U6, RJ45 magnetics, Y-cap C3
 - **Creepage primary↔secondary:** ≥ 4.0 mm
 - **Clearance:** ≥ 4.0 mm
 
