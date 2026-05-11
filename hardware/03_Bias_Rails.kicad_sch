@@ -8,6 +8,7 @@
 		(title "PoEt — Sheet 03: Bias Rails")
 		(date "2026-05-11")
 		(rev "A")
+		(company "gh0stee.com")
 		(comment 1 "+3V3 (U4 AP2112K-3.3) and +1V0 (U5 RT9013-10GB) LDOs from the isolated 5 V rail")
 		(comment 2 "Both outputs feed Sheet 04 (RTL8153B I/O ring and core)")
 	)

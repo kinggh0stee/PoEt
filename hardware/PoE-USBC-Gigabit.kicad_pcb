@@ -11,6 +11,7 @@
 		(title "PoE to USB-C Gigabit Adapter")
 		(date "2026-05-10")
 		(rev "A")
+		(company "gh0stee.com")
 	)
 	(layers
 		(0 "F.Cu" signal)

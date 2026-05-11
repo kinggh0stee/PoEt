@@ -8,6 +8,7 @@
 		(title "PoEt — Sheet 05: USB-C Connector")
 		(date "2026-05-11")
 		(rev "A")
+		(company "gh0stee.com")
 		(comment 1 "USB-C receptacle J2, CC Rp pull-ups, VBUS bulk, ESD array U9, SS AC-coupling, PPTC fuse F1")
 		(comment 2 "Source role: 5 V output. CC Rp = 22 kΩ → advertises 1.5 A (7.5 W)")
 		(comment 3 "Single-orientation SS. USB 2.0 reversible via shorted A6/B6 and A7/B7 pads at J2.")

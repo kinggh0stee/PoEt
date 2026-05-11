@@ -8,6 +8,7 @@
 		(title "PoEt — Sheet 02: PoE PD + Flyback Converter")
 		(date "2026-05-10")
 		(rev "A")
+		(company "gh0stee.com")
 		(comment 1 "Schottky bridges → Si3402-B PoE PD → flyback T1 → 5 V / 2 A secondary rail")
 		(comment 2 "Primary side LEFT of barrier | Secondary side RIGHT of barrier")
 		(comment 3 "CREEPAGE RULE: ≥ 4 mm slot in all 4 Cu layers at isolation barrier")

@@ -2,6 +2,8 @@
 
 A KiCad PCB project that converts an **802.3af PoE** Ethernet drop into a USB-C port carrying both **5 V / 2 A power** and **Gigabit Ethernet over USB 3.0**. Open-hardware clone of the Ubiquiti **UACC-Adapter-PoE-USBC** ($49 retail).
 
+Design by [gh0stee.com](https://gh0stee.com)
+
 ## Features
 
 - Single RJ45 input from a PoE switch; single USB-C output to the host device

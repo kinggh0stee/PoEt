@@ -8,6 +8,7 @@
 		(title "PoEt — Sheet 04: RTL8153B Bridge")
 		(date "2026-05-11")
 		(rev "A")
+		(company "gh0stee.com")
 		(comment 1 "Realtek RTL8153B USB 3.0 ↔ Gigabit Ethernet controller (~60 pins)")
 		(comment 2 "EEPROM U3 (93C46) | 25 MHz crystal Y1 | Reset SW1 | LED drivers")
 		(comment 3 "MDI[0..3] ← Sheet 01  |  USB SS + D+/D- → Sheet 05  |  LEDs → Sheet 01")

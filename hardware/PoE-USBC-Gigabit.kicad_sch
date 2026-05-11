@@ -8,6 +8,7 @@
 		(title "PoEt — PoE to USB-C Gigabit Adapter")
 		(date "2026-05-10")
 		(rev "A")
+		(company "gh0stee.com")
 		(comment 1 "Root sheet — hierarchical sub-sheets for each functional block")
 		(comment 2 "PoE 802.3af  →  Si3402-B  →  RTL8153B USB 3.0 / GbE  →  USB-C 5 V/2 A")
 	)

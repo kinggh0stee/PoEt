@@ -8,6 +8,7 @@
 		(title "PoEt — Sheet 01: PoE Frontend")
 		(date "2026-05-10")
 		(rev "A")
+		(company "gh0stee.com")
 		(comment 1 "RJ45 + integrated magnetics, ESD protection, MDI breakout")
 		(comment 2 "PoE pair-set center taps to PD converter (sheet 02)")
 		(comment 3 "MDI[0..3] pairs to RTL8153B (sheet 04)")
