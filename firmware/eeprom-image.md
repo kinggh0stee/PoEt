@@ -91,7 +91,7 @@ CS: active high
 3. **Disable erase/write** (EWDS) when done:
    - CS high → clock out: `1 0 00 000000` (9 bits) → CS low
 
-**Practical note:** Most Bus Pirate users script this in Python using `pyserial` to send the raw bit sequences. A sample script is straightforward but board-specific — write one based on the `eeprom-default.bin` output from `eeprom-encoder.py`, reading 2 bytes at a time (little-endian) as each 16-bit word to program.
+**Practical note:** Most Bus Pirate users script this in Python using `pyserial` to send the raw bit sequences. A sample script is straightforward but board-specific — write one based on the `eeprom-default.bin` output from `eeprom_encoder.py`, reading 2 bytes at a time (little-endian) as each 16-bit word to program.
 
 ### Option C — Pre-program before assembly
 
@@ -104,6 +104,6 @@ Order the 93LC46 from a distributor that offers custom-programmed EEPROMs (e.g.,
 
 ## Files
 
-- `eeprom-default.bin` — 128-byte template (generate with `python3 eeprom-encoder.py eeprom-default.yaml`)
-- `eeprom-encoder.py` — script to produce a .bin from a YAML config (see below)
+- `eeprom-default.bin` — 128-byte template (generate with `python3 eeprom_encoder.py eeprom-default.yaml`)
+- `eeprom_encoder.py` — script to produce a .bin from a YAML config (see below)
 - `eeprom-default.yaml` — default config (Realtek VID/PID, locally-administered MAC)

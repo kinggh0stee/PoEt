@@ -71,7 +71,7 @@ PoE-USBC-Gigabit.kicad_sch                      ← root, sheet symbols + title 
 
 - Zero unconnected pins (label TX2/RX2 / SBU as NC)
 - Zero missing power flag errors
-- Deliberate "different net names" warning for Y-cap → suppress with net tie footprint
+- Deliberate "different net names" warning for Y-cap → suppress with a net tie footprint (`Mechanical:SolderJumper_2_Open` from the KiCad standard library; place it on the `GND_POE`–`GND` connection at C3)
 - About 50–60 nets total — small project, ERC should be quick
 
 ## Style conventions

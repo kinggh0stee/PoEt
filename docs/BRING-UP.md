@@ -170,12 +170,12 @@ If a rail is missing: check EN pull-up resistors (Sheet 03), check input bypass 
 
 | Symptom | Likely cause | Check |
 |---|---|---|
-| Switch never grants PoE | Wrong RDET / RCLS values | R1 = 24.9 kΩ, R2 = 12.1 kΩ |
-| +5V absent, switch granted power | Flyback not oscillating | U1 COMP network, T1 dot polarity, R_OPT value |
-| +5V present but > 5.1 V | TL431 feedback resistor ratio | R_UPPER / R_LOWER divider |
-| USB not detected at all | +3V3 or +1V0 missing | Stages 3 checklist |
-| USB enumerates, wrong VID/PID | EEPROM blank or wrong | Re-program per firmware/eeprom-image.md |
-| SS doesn't train, USB 2.0 only | C15/C16 AC-coupling or wrong SS pair routed | Check AC caps and orientation |
-| Ethernet link won't reach 1G | MDI impedance / length mismatch | Layout review against design-spec §3.2 |
-| F1 trips under light load | PPTC fuse in wrong footprint (high resistance part) | Verify MPN: Bourns MF-MSMF200/33X-2 |
-| Si3402-B very hot at low load | Compensation network oscillating | Replace COMP RC per AN1004 Table 2 |
+| Switch never grants PoE | Wrong RDET / RCLS values | R1 = 24.9 kΩ, R2 = 12.1 kΩ — see Stage 2 |
+| +5V absent, switch granted power | Flyback not oscillating | U1 COMP network, T1 dot polarity, R_OPT value — see Si3402-B AN1004 Figure 11 |
+| +5V present but > 5.1 V | TL431 feedback resistor ratio | R_UPPER / R_LOWER divider — see Si3402-B AN1004 Table 3 |
+| USB not detected at all | +3V3 or +1V0 missing | See Stage 3 checklist |
+| USB enumerates, wrong VID/PID | EEPROM blank or wrong | Re-program per `firmware/eeprom-image.md` §Programming |
+| SS doesn't train, USB 2.0 only | C15/C16 AC-coupling or wrong SS pair routed | See Stage 4; check C15/C16 (100 nF on TX pair) and USB-C orientation |
+| Ethernet link won't reach 1G | MDI impedance / length mismatch | See Stage 5; layout review against `docs/design-spec.md` §3.2 rule 4 |
+| F1 trips under light load | PPTC fuse in wrong footprint (high resistance part) | Verify MPN: Bourns MF-MSMF200/33X-2 or TE MICROSMD200F-2 |
+| Si3402-B very hot at low load | Compensation network oscillating | Replace COMP RC per Si3402-B AN1004 Table 2 |
