@@ -71,6 +71,14 @@ class TestBuildEeprom:
         with pytest.raises(ValueError, match="VID"):
             build_eeprom(default_cfg(vid=0x1FFFF))
 
+    def test_vid_non_integer(self):
+        with pytest.raises(ValueError, match="'vid' must be an integer"):
+            build_eeprom(default_cfg(vid="oops"))
+
+    def test_pid_non_integer(self):
+        with pytest.raises(ValueError, match="'pid' must be an integer"):
+            build_eeprom(default_cfg(pid="oops"))
+
     def test_string_overflow(self):
         with pytest.raises(ValueError, match="overflows"):
             build_eeprom(default_cfg(manufacturer="A" * 60, product="B" * 60))
