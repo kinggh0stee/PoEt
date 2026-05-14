@@ -52,24 +52,31 @@ PoE-USBC-Gigabit.kicad_sch                      ← root, sheet symbols + title 
 
 ### Sheet 05 — USB-C Connector
 - **In:** `+5V`, `GND`, `USB_SSTX+/-`, `USB_SSRX+/-`, `USB_DP`, `USB_DM`
+  - `+3V3` is available as a global power net (no hierarchical label needed) for the comparator pull-up
 - **Local components:**
   - J2 USB-C 24-pin receptacle
   - **R10, R11** = 22 kΩ 1 % from CC1, CC2 to `+5V` (Rp = advertise 1.5 A source)
-  - U10 ESD array on SS pair and D+/D-
-  - C15, C16 (100 nF) AC-coupling caps on USB_SSTX+/- pair only — between RTL8153B and J2
+  - **U11** PI3DBS12412A (or FSUSB43L10X) — 4-channel 2:1 SS mux; routes SSTX±/SSRX± to TX1/RX1 or TX2/RX2 depending on SEL
+  - **U12** LMV321 single comparator (SOT-23-5) — IN+ = CC1, IN- = CC2; output drives U11 SEL; 10 kΩ pull-up (R12) from output to `+3V3`
+  - **U10a, U10b** NUP4202W1 ESD arrays — one per SS pair set (TX1/RX1 and TX2/RX2), placed between mux outputs and J2
+  - **U10c** NUP4202W1 on D+/D-
+  - C15, C16 (100 nF) AC-coupling caps on USB_SSTX+/- **upstream of U11** (between hierarchical label and mux input)
   - C11–C14 VBUS bulk at the connector (3× 22 µF X5R + 100 nF)
 - **Connector pin notes:**
-  - SSTX±, SSRX± routed to **TX1+, TX1-, RX1+, RX1-** only (single orientation)
-  - TX2/RX2 pins → **NC** (use NC labels to silence ERC)
+  - TX1+, TX1-, RX1+, RX1- and **TX2+, TX2-, RX2+, RX2-** all connected through U11 mux
+  - SBU1, SBU2 → NC
   - D+ wired to both A6 and B6 (shorted at connector pads, USB 2.0 reversibility)
   - D- wired to both A7 and B7 (same)
-  - SBU1, SBU2 → NC
   - VBUS pins (A4, A9, B4, B9) all bussed to `+5V`
   - GND pins (A1, A12, B1, B12) all to `GND`
+- **Orientation detection logic:**
+  - When cable inserted orientation 1: CC1 pulled to ≈ 0.9 V by host Rd (5.1 kΩ); CC1 < CC2 → comparator output LOW → SEL = 0 → U11 routes SSTX to TX1, RX1 to SSRX
+  - When cable inserted orientation 2: CC2 pulled low; CC1 > CC2 → comparator output HIGH → SEL = 1 → U11 routes SSTX to TX2, RX2 to SSRX
+  - No cable: both CC at ~5 V; comparator output indeterminate — does not matter
 
 ## ERC expectations
 
-- Zero unconnected pins (label TX2/RX2 / SBU as NC)
+- Zero unconnected pins — label only SBU1/SBU2 as NC; TX2/RX2 are wired through U11 mux and must **not** have No-Connect flags
 - Zero missing power flag errors
 - Deliberate "different net names" warning for Y-cap → suppress with a net tie footprint (`Mechanical:SolderJumper_2_Open` from the KiCad standard library; place it on the `GND_POE`–`GND` connection at C3)
 - About 50–60 nets total — small project, ERC should be quick

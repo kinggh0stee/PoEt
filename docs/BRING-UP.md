@@ -119,7 +119,7 @@ If a rail is missing: check EN pull-up resistors (Sheet 03), check input bypass 
 - Check +3V3 and +1V0 (Stage 3 must be clean)
 - Check crystal Y1 — 25 MHz should be visible on an oscilloscope at the XTAL pins
 - Check U3 EEPROM: if blank or misconfigured, RTL8153B may enumerate with wrong VID/PID (won't bind to `r8152`). Re-program EEPROM per `firmware/eeprom-image.md`.
-- Check USB-C connector orientation (TX1/RX1 single-orientation SS)
+- Check USB-C connector orientation; try flipping the cable — U11 mux should route to TX1/RX1 or TX2/RX2 depending on which CC pin is active. If SS trains in one orientation but not the other, check U12 comparator output (SS_SEL should toggle with cable flip) and U11 SEL pin.
 
 ---
 
@@ -175,7 +175,8 @@ If a rail is missing: check EN pull-up resistors (Sheet 03), check input bypass 
 | +5V present but > 5.1 V | TL431 feedback resistor ratio | R_UPPER / R_LOWER divider — see Si3402-B AN1004 Table 3 |
 | USB not detected at all | +3V3 or +1V0 missing | See Stage 3 checklist |
 | USB enumerates, wrong VID/PID | EEPROM blank or wrong | Re-program per `firmware/eeprom-image.md` §Programming |
-| SS doesn't train, USB 2.0 only | C15/C16 AC-coupling or wrong SS pair routed | See Stage 4; check C15/C16 (100 nF on TX pair) and USB-C orientation |
+| SS doesn't train in either orientation | C15/C16 AC-coupling caps or U11 mux wiring | See Stage 4; verify C15/C16 are on SSTX upstream of U11; check U11 VCC = +3V3 (not 5V); check U11 SEL receives a valid logic level |
+| SS trains in one orientation only | U12 comparator not detecting CC or U11 SEL stuck | Probe SS_SEL with DMM while flipping cable — should toggle between ~0 V and ~3.3 V; if stuck, check R12 pull-up (10 kΩ to +3V3) and U12 IN+/IN- wiring to CC1/CC2 |
 | Ethernet link won't reach 1G | MDI impedance / length mismatch | See Stage 5; layout review against `docs/design-spec.md` §3.2 rule 4 |
 | F1 trips under light load | PPTC fuse in wrong footprint (high resistance part) | Verify MPN: Bourns MF-MSMF200/33X-2 or TE MICROSMD200F-2 |
 | Si3402-B very hot at low load | Compensation network oscillating | Replace COMP RC per Si3402-B AN1004 Table 2 |

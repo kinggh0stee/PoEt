@@ -9,12 +9,11 @@ Design by [gh0stee.com](https://gh0stee.com)
 - Single RJ45 input from a PoE switch; single USB-C output to the host device
 - USB-C host sees a Gigabit Ethernet adapter — driver-less on Linux, Windows, macOS, ChromeOS, and iPadOS
 - Up to **10 W (5 V × 2 A)** delivered over USB-C, sufficient for a Raspberry Pi Zero 2 W, Pi 4 (light load), USB-C cameras, and similar single-board computers
-- Full Gigabit throughput with a USB 3.x cable; degrades gracefully to ~480 Mbps on a USB 2.0 cable
+- Full Gigabit throughput with a USB 3.x cable in either orientation; degrades gracefully to ~480 Mbps on a USB 2.0 cable
 
 ## Limitations
 
 - No USB Power Delivery — output is fixed 5 V; laptops and fast-charge phones are not supported
-- SuperSpeed lanes are single-orientation only. USB 2.0 fallback works in either orientation, so the device always enumerates; Gigabit throughput requires the cable to be inserted in the correct orientation
 
 ## Block Diagram
 
@@ -59,7 +58,7 @@ Single-chip PoE PD (Si3402-B handles detect, classify, hot-swap, and flyback con
 |---|---|
 | PoE input | IEEE 802.3af Type 1 (Class 0 advertisement, ≤ 12.95 W at PD) |
 | Ethernet | 10 / 100 / 1000 BASE-T full duplex, auto MDI/MDIX |
-| USB output | USB 3.2 Gen 1 (5 Gbps), Type-C, single-orientation SS |
+| USB output | USB 3.2 Gen 1 (5 Gbps), Type-C, dual-orientation SS via mux (U11 + U12) |
 | USB-C power role | Source, 5 V / 2 A; CC Rp = 22 kΩ → 1.5 A advertised (7.5 W) |
 | Isolation | 1500 Vrms (PoE side to USB side) |
 | Dimensions | ~60 × 30 mm, 4-layer board |
