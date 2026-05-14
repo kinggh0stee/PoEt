@@ -13,6 +13,7 @@ Byte layout per eeprom-image.md. Fields not set by the YAML are left 0xFF
 import sys
 import struct
 from pathlib import Path
+from typing import Any
 try:
     import yaml
 except ImportError:
@@ -30,9 +31,12 @@ def encode_mac(mac_str: str) -> bytes:
     result = []
     for i, p in enumerate(parts):
         try:
-            result.append(int(p, 16))
+            value = int(p, 16)
         except ValueError:
             raise ValueError(f"MAC octet {i} is not valid hex: {p!r} in {mac_str!r}")
+        if not 0 <= value <= 0xFF:
+            raise ValueError(f"MAC octet {i} value 0x{value:X} out of range 0x00-0xFF in {mac_str!r}")
+        result.append(value)
     return bytes(result)
 
 
@@ -44,7 +48,7 @@ def encode_usb_string(text: str) -> bytes:
     return bytes([length, 0x03]) + utf16
 
 
-def build_eeprom(cfg: dict) -> bytes:
+def build_eeprom(cfg: dict[str, Any]) -> bytes:
     buf = bytearray([0xFF] * EEPROM_SIZE)
 
     # 0x00-0x01: signature
@@ -78,14 +82,29 @@ def build_eeprom(cfg: dict) -> bytes:
 
     # 0x0E: MaxPower
     self_powered = bool(cfg.get("self_powered", True))
-    max_power_ma = int(cfg.get("max_power_ma", 0))
+    try:
+        max_power_ma = int(cfg.get("max_power_ma", 0))
+    except (TypeError, ValueError):
+        raise ValueError(f"'max_power_ma' must be an integer, got {cfg.get('max_power_ma')!r}")
+    if max_power_ma < 0:
+        raise ValueError(f"'max_power_ma' must be non-negative, got {max_power_ma}")
+    if not self_powered and max_power_ma > 510:
+        raise ValueError(
+            f"'max_power_ma' {max_power_ma} exceeds USB max 510 mA (encoded as a single byte × 2)"
+        )
     buf[0x0E] = 0 if self_powered else max(1, max_power_ma // 2)
 
     # 0x0F: config flags — bit 5 = self-powered
     buf[0x0F] = 0x20 if self_powered else 0x00
 
     # 0x10: LED config
-    buf[0x10] = int(cfg.get("led_config", 0x07))
+    try:
+        led_config = int(cfg.get("led_config", 0x07))
+    except (TypeError, ValueError):
+        raise ValueError(f"'led_config' must be an integer, got {cfg.get('led_config')!r}")
+    if not 0 <= led_config <= 0xFF:
+        raise ValueError(f"'led_config' 0x{led_config:X} out of byte range 0x00-0xFF")
+    buf[0x10] = led_config
 
     # 0x11-0x1F: reserved, leave 0xFF
 
@@ -106,7 +125,7 @@ def build_eeprom(cfg: dict) -> bytes:
     return bytes(buf)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <config.yaml> [output.bin]", file=sys.stderr)
         sys.exit(1)
@@ -116,6 +135,10 @@ def main():
 
     with open(yaml_path) as f:
         cfg = yaml.safe_load(f)
+    if cfg is None:
+        cfg = {}
+    if not isinstance(cfg, dict):
+        sys.exit(f"YAML root must be a mapping, got {type(cfg).__name__}: {yaml_path}")
 
     data = build_eeprom(cfg)
     if len(data) != EEPROM_SIZE:
