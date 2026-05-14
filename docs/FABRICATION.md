@@ -110,7 +110,7 @@ If ordering assembled boards (JLCPCB SMT assembly service):
 
 | Net class | Layers | Trace W | Gap | Target Ω | Notes |
 |---|---|---|---|---|---|
-| USB3_SS | F.Cu over In1.Cu GND | 0.15 mm | 0.13 mm | 90 Ω diff | USB 3.2 Gen1 SS pair |
+| USB3_SS | F.Cu over In1.Cu GND | 0.15 mm | 0.13 mm | 90 Ω diff | USB 3.2 Gen1 SS pair — applies RTL8153B → C15/C16 → U11 → U10a/U10b → J2 (all segments) |
 | ETHERNET_MDI | F.Cu over In1.Cu GND | 0.25 mm | 0.20 mm | 100 Ω diff | 1000BASE-T MDI |
 | USB 2.0 D+/D- | F.Cu over In1.Cu GND | 0.20 mm | — | 50 Ω SE | Short traces, less critical |
 

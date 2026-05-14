@@ -15,8 +15,8 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 | U7 | 1 | Shunt regulator | TL431 reference | TL431ASN | LCSC C7831 |
 | U101, U102 | 2 | ESD protection (MDI) | 4-line TVS array — Sheet 01, MDI0±–MDI3± | NUP4202W1T1G | Digi-Key |
 | U10a, U10b, U10c | 3 | ESD protection (USB-C) | 4-line TVS array — Sheet 05: U10a on TX1/RX1, U10b on TX2/RX2, U10c on D+/D- | NUP4202W1T1G | Digi-Key |
-| U11 | 1 | SS orientation mux | 4-channel 2:1 USB 3.0 SuperSpeed mux/demux, ≤ 12 Gbps, SEL-controlled | **PI3DBS12412A** (Diodes Inc.) or FSUSB43L10X (ON Semi) | Digi-Key / Mouser |
-| U12 | 1 | CC orientation comparator | Single supply comparator, SOT-23-5 — detects which CC pin is active to drive U11 SEL | **LMV321** | LCSC / Digi-Key |
+| U11 | 1 | SS orientation mux | 4-channel 2:1 USB 3.0 SS mux/demux, ≤ 12 Gbps, SEL-controlled; **UFQFN-24** | **PI3DBS12412A** (Diodes Inc.) or FSUSB43L10X (ON Semi, SOT-23-6) | Digi-Key / Mouser (no LCSC listing confirmed — verify before ordering JLCPCB assembly) |
+| U12 | 1 | CC orientation comparator | Single-supply comparator, **SOT-23-5** — IN+=CC1, IN-=CC2; output drives U11 SEL via R12 | **LMV321IDBVR** (TI) | LCSC C7950 / Digi-Key |
 
 ## Magnetics & connectors
 
@@ -81,7 +81,7 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 
 | Category | Single qty | 1k qty |
 |---|---|---|
-| Critical ICs (U1–U7, U10, U101, U102) | $9.75 | $5.65 |
+| Critical ICs (U1–U7, U10a–U10c, U11, U12, U101, U102) | $11.50 | $6.85 |
 | Magnetics (J1, T1, L1, L2) | $5.20 | $2.80 |
 | USB-C receptacle | $0.80 | $0.35 |
 | Passives (~80 parts) | $4.00 | $1.20 |

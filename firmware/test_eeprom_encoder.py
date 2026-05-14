@@ -1,4 +1,4 @@
-"""Tests for eeprom-encoder.py"""
+"""Tests for eeprom_encoder.py"""
 import struct
 import pytest
 from eeprom_encoder import build_eeprom, encode_mac, encode_usb_string, EEPROM_SIZE, SIGNATURE

@@ -76,7 +76,7 @@ PoE-USBC-Gigabit.kicad_sch                      ← root, sheet symbols + title 
 
 ## ERC expectations
 
-- Zero unconnected pins (label TX2/RX2 / SBU as NC)
+- Zero unconnected pins — label only SBU1/SBU2 as NC; TX2/RX2 are wired through U11 mux and must **not** have No-Connect flags
 - Zero missing power flag errors
 - Deliberate "different net names" warning for Y-cap → suppress with a net tie footprint (`Mechanical:SolderJumper_2_Open` from the KiCad standard library; place it on the `GND_POE`–`GND` connection at C3)
 - About 50–60 nets total — small project, ERC should be quick

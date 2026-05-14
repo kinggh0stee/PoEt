@@ -31,6 +31,7 @@ Rev A · 2026-05 · v3 (simplified to match Ubiquiti UACC-Adapter-PoE-USBC)
 - **Power source:** 5 V / 2 A from secondary rail
 - **CC configuration:**
   - CC1 and CC2 each pulled to **+5 V via 22 kΩ Rp** → advertises **5 V @ 1.5 A** (USB-C "Type-C 1.5 A" current)
+  - CC1 and CC2 also tapped to U12 (LMV321) comparator inputs for orientation detection: when a cable is inserted, the active CC pin is pulled to ≈ 0.9 V by the host's Rd (5.1 kΩ); the idle CC stays at ~5 V through Rp. Comparator output (pulled up to +3V3 via R12 10 kΩ) drives U11 SEL: low = orientation 1 (TX1/RX1), high = orientation 2 (TX2/RX2).
   - Could use Rp = 10 kΩ to advertise 3 A, but supply is only 2 A — host might over-draw. **22 kΩ is the safe choice.**
 - **VCONN:** not supplied. No e-marked cable required.
 
@@ -81,11 +82,11 @@ RJ45 magnetics MDI[0..3]+/- (4 pairs in 1000BASE-T)
   → RTL8153B MDI inputs
   → internal Gigabit PHY + MAC + USB 3.0 device
   → SuperSpeed differential (SSTX±, SSRX±)
-  → AC-coupling caps (100 nF) on SSTX pair only (upstream of mux)
-  → PI3DBS12412A SS mux (SEL driven by CC orientation comparator)
-      SEL=0 (CC1 active): SSTX→TX1±, RX1±→SSRX
-      SEL=1 (CC2 active): SSTX→TX2±, RX2±→SSRX
-  → ESD (NUP4202W1) on all four SS pairs at connector
+  → AC-coupling caps (100 nF) on SSTX pair only, upstream of mux
+  → PI3DBS12412A SS mux U11 (SEL driven by LMV321 comparator U12)
+      CC1 vs CC2 → U12 LMV321 → SEL; CC1 active (≈ 0.9 V) → SEL=0
+      SEL=0: SSTX→TX1±, RX1±→SSRX  |  SEL=1: SSTX→TX2±, RX2±→SSRX
+  → ESD (NUP4202W1 U10a/U10b) on all four SS pairs at connector
   → USB-C TX1±/RX1± and TX2±/RX2± pins (both orientations)
   → USB 2.0 D+/D- routed direct, both orientations shorted at pad
 ```
@@ -118,7 +119,9 @@ Manufacturer: JLCPCB JLC04161H-7628 stackup, controlled impedance:
 
 1. **Isolation gap:** ≥ 4 mm slot in **all four copper layers** between PoE primary and USB secondary. Cut under T1. Mark on silkscreen.
 2. **PoE primary loop:** Vin → bridge → bulk cap → Si3402-B → xfmr primary → return; keep the loop area as small as possible — high di/dt.
-3. **USB 3.0 SS pair:** 90 Ω diff, length-match within 0.1 mm intra-pair, max 2 vias, no stubs, reference to solid GND. AC-couple caps (100 nF GRM188) on TX side only, close to USB-C connector.
+3. **USB 3.0 SS pair:** 90 Ω diff, length-match within 0.1 mm intra-pair, max 2 vias, no stubs, reference to solid GND. AC-couple caps (100 nF GRM188) on SSTX side only, **upstream of U11 mux** (between RTL8153B and mux input — not between mux and connector).
+10. **SS mux U11 (PI3DBS12412A):** place close to AC-coupling caps (C15/C16); keep mux output traces to U10a/U10b ESD and on to J2 within the USB3_SS net class (90 Ω diff, ≤ 2 vias, length-match within 0.1 mm). U11 VCC → `+3V3` with 100 nF bypass cap < 1 mm from pin; do not connect to `+5V`.
+11. **Comparator U12 (LMV321):** place near the CC1/CC2 nets and U11 SEL pin. No impedance-sensitive routing required; SS_SEL is a low-speed logic signal. Keep CC traces < 20 mm to minimise parasitic capacitance on the Rp divider.
 4. **Ethernet MDI:** 100 Ω diff, length-match within 0.5 mm, all 4 pairs same length within 5 mm. RJ45 within 25 mm of RTL8153B.
 5. **Bob Smith termination:** verify integrated jack already includes 75 Ω + kV cap to chassis ground; if not, add externally.
 6. **Crystal Y1 (25 MHz):** under RTL8153B XTAL pins, GND guard ring, no traces underneath, GND vias around guard.
