@@ -2,6 +2,11 @@
 
 Quantities are per board. Substitutes must match footprint **and** electrical rating.
 
+> **Safety-critical parts.** Components marked **§ CSA** in the rightmost column
+> cross or support the PoE↔USB reinforced-insulation barrier and must carry
+> the listed safety certification before submission to an NRTL. See
+> `docs/CSA-COMPLIANCE.md` §4 for the full requirement matrix.
+
 ## Critical / single-source ICs
 
 | Ref | Qty | Part | Description | MPN | Source |
@@ -11,7 +16,7 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 | U3 | 1 | EEPROM | 93LC46 1 Kbit MicroWire (CMOS 3-wire, 2.0–5.5 V) | 93LC46BT-I/OT | Digi-Key |
 | U4 | 1 | 3.3 V LDO (RTL8153B I/O) | 500 mA low-noise | AP2112K-3.3 | LCSC C51118 |
 | U5 | 1 | 1.0 V LDO (RTL8153B core) | 500 mA fixed 1.0 V | RT9013-10GB | LCSC C47773 |
-| U6 | 1 | Optocoupler | Si3402-B feedback isolation | PC817B | LCSC C7440 |
+| U6 | 1 | Optocoupler **§ CSA** | Si3402-B feedback isolation; **VDE 0884-11 reinforced-insulation grade required** — specify **PC817B-X1** (Sharp, with -X1 suffix), **TLP785(GR)** (Toshiba) or equivalent ≥ 5000 V rms, reinforced. Generic PC817B is basic-insulation only. | PC817B**-X1** | LCSC C7440 (verify suffix on order) |
 | U7 | 1 | Shunt regulator | TL431 reference | TL431ASN | LCSC C7831 |
 | U101, U102 | 2 | ESD protection (MDI) | 4-line TVS array — Sheet 01, MDI0±–MDI3± | NUP4202W1T1G | Digi-Key |
 | U10a, U10b, U10c | 3 | ESD protection (USB-C) | 4-line TVS array — Sheet 05: U10a on TX1/RX1, U10b on TX2/RX2, U10c on D+/D- | NUP4202W1T1G | Digi-Key |
@@ -22,8 +27,8 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 
 | Ref | Qty | Part | Description | MPN |
 |---|---|---|---|---|
-| J1 | 1 | RJ45 jack with magnetics | PoE-rated, integrated mag, LEDs | **Bel Fuse 0826-1G1T-DV-F** or Pulse JK0-0177NL |
-| T1 | 1 | Flyback transformer | 802.3af, primary 36–57 V → 5 V/2 A, isolation 1500 V, **matched to Si3402-B reference design AN1004** | Würth 750313638 or Coilcraft Y8862-AL |
+| J1 | 1 | RJ45 jack with magnetics **§ CSA** | PoE-rated, integrated mag, LEDs; UL/CSA 60950 or 62368 listed (typical for this part class — confirm certificate # in datasheet) | **Bel Fuse 0826-1G1T-DV-F** or Pulse JK0-0177NL |
+| T1 | 1 | Flyback transformer **§ CSA** | 802.3af, primary 36–57 V → 5 V/2 A, isolation 1500 V rms, **matched to Si3402-B reference design AN1004**, **IEC 61558-2-16 / UL 1411 listing required for reinforced insulation** — record certificate # | Würth 750313638 or Coilcraft Y8862-AL |
 | L1 | 1 | USB SS common-mode choke | 90 Ω @ 100 MHz, USB 3.0 rated | Murata DLP11SN900HL2L |
 | L2 | 1 | USB 2.0 CMC | 90 Ω @ 100 MHz | Murata DLW21SN900SQ2L |
 | FB1 | 1 | Ferrite bead | 600 Ω @ 100 MHz, 3 A | BLM21PG600SH1D |
@@ -35,9 +40,10 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 |---|---|---|---|---|
 | D1, D2 | 2 | DF06S | Bridge rectifier 600 V / 1 A | One per pair set |
 | D3 | 1 | SMAJ58A | TVS unidir 58 V | Across V_POE rail |
+| F_in | 1 | 1 A T 250 V | **Slow-blow fuse § CSA**, UL 248 listed (e.g. Littelfuse 0451001.MRL, Bel Fuse C1F-1-R) | **In series with V_POE+** — required by 62368-1 §5.5.6 for primary-side fault current limiting; **not present in Rev A schematic, add for Rev B** |
 | C1 | 1 | 10 µF / 100 V | X7R 1210 | PoE bulk |
 | C2 | 1 | 47 µF / 100 V | Aluminum electrolytic, low ESR | PoE bulk |
-| C3 | 1 | 1 nF / 2 kV | Y2 ceramic | Across iso barrier |
+| C3 | 1 | 1 nF / 250 V AC | **Y1 ceramic § CSA** — Y1 class is mandatory for **reinforced** insulation across the PoE↔USB barrier (8 kV impulse, IEC 60384-14). Y2 = basic only and is **not acceptable**. Suggested MPN: **Murata DE2B3KY102KA3B** or TDK CD45-B3GA102KYNS. Replaces the Rev A Y2 spec. | Across iso barrier |
 | R1 | 1 | 24.9 kΩ 1 % | RDET | Detection signature |
 | R2 | 1 | 12.1 kΩ 1 % | RCLS | Class 3 (6.49–12.95 W) — verify per Si3402-B Table 4 |
 
@@ -53,7 +59,7 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 | C15, C16 | 2 | 100 nF / 16 V | X7R 0402 | USB SS AC-coupling on TX pair |
 | **R10, R11** | 2 | **22 kΩ 1 %** | 0402 | Rp on CC1, CC2 → 5 V (advertise 1.5 A) |
 | R12 | 1 | 10 kΩ | 0402 | Pull-up from U12 comparator output to +3V3 (open-drain output to SEL logic level) |
-| F1 | 1 | 2 A / 6 V PPTC | Resettable fuse | VBUS over-current protection; Bourns MF-MSMF200/33X-2 or TE MICROSMD200F-2 |
+| F1 | 1 | 2 A / 6 V PPTC | **Resettable fuse § CSA** — UL 248-14 listed. Bourns MF-MSMF200/33X-2 and TE MICROSMD200F-2 are both UL recognized. | VBUS over-current protection |
 
 ## RTL8153B support
 
@@ -98,3 +104,4 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 - **Flyback transformer** — must be matched to the chosen PD controller's reference design (turns ratio, leakage L, isolation rating). Don't sub blindly.
 - **RJ45 magnetics** — must be PoE-rated. Non-PoE jacks fail at the center-tap current.
 - **F1 (PPTC fuse)** — protects against host over-draw on VBUS (>2.2 A causes a clean shutoff instead of a brownout). Any 2 A / 6 V PPTC in a 1206 footprint works. If substituting a TPS25940 eFuse for active limiting, update R2 and connect PG/EN per TPS25940 datasheet.
+- **Safety listings (CSA-marked parts).** Before ordering production-intent stock for the parts flagged **§ CSA** above (C3, T1, U6, J1, F1, F_in), record the supplier's certificate number on the BOM line. NRTLs require these on the technical file. See `docs/CSA-COMPLIANCE.md` §4.
