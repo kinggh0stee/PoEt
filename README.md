@@ -14,7 +14,7 @@ Design by [gh0stee.com](https://gh0stee.com)
 ## Limitations
 
 - No USB Power Delivery — output is fixed 5 V; laptops and fast-charge phones are not supported
-- SuperSpeed (USB 3.0) lanes are single-orientation only. USB 2.0 fallback works in either orientation, so the device always enumerates; Gigabit throughput requires the cable to be inserted in the correct orientation
+- SuperSpeed lanes are single-orientation only. USB 2.0 fallback works in either orientation, so the device always enumerates; Gigabit throughput requires the cable to be inserted in the correct orientation
 
 ## Block Diagram
 
@@ -57,24 +57,23 @@ Single-chip PoE PD (Si3402-B handles detect, classify, hot-swap, and flyback con
 
 | Parameter | Value |
 |---|---|
-| PoE input | IEEE 802.3af Type 1 (Class 0 advertisement, ≤12.95 W at PD) |
+| PoE input | IEEE 802.3af Type 1 (Class 0 advertisement, ≤ 12.95 W at PD) |
 | Ethernet | 10 / 100 / 1000 BASE-T full duplex, auto MDI/MDIX |
 | USB output | USB 3.2 Gen 1 (5 Gbps), Type-C, single-orientation SS |
-| USB-C power role | Source, 5 V / 2 A output; CC Rp = 22 kΩ → 1.5 A advertised (7.5 W) |
+| USB-C power role | Source, 5 V / 2 A; CC Rp = 22 kΩ → 1.5 A advertised (7.5 W) |
 | Isolation | 1500 Vrms (PoE side to USB side) |
-| Target dimensions | ~60 × 30 mm, 4-layer board |
+| Dimensions | ~60 × 30 mm, 4-layer board |
 | Operating temp | 0 – 50 °C |
-| Target BOM (1k qty) | ~$10 |
+| BOM cost | ~$31 single unit / ~$13 at 1k qty |
 
 ## Repository Layout
 
 ```
 PoEt/
-├── README.md
 ├── hardware/                           ← KiCad project
 │   ├── PoE-USBC-Gigabit.kicad_pro
 │   ├── PoE-USBC-Gigabit.kicad_sch     ← root sheet (sheet symbols + title block)
-│   ├── PoE-USBC-Gigabit.kicad_pcb     ← PCB layout (4-layer, 60×30 mm starter)
+│   ├── PoE-USBC-Gigabit.kicad_pcb     ← PCB layout (4-layer, 60×30 mm)
 │   ├── 01_PoE_Frontend.kicad_sch      ← RJ45, magnetics, ESD, MDI breakout
 │   ├── 02_PoE_PD_Converter.kicad_sch  ← bridges, Si3402-B, flyback, feedback
 │   ├── 03_Bias_Rails.kicad_sch        ← 3.3 V and 1.0 V LDOs
@@ -82,36 +81,64 @@ PoEt/
 │   └── 05_USBC_Connector.kicad_sch    ← USB-C receptacle, CC Rp, ESD, AC-coupling
 ├── docs/
 │   ├── design-spec.md                 ← electrical spec, layout rules
-│   ├── bom.md                         ← parts list
+│   ├── bom.md                         ← full parts list with LCSC numbers
 │   ├── schematic-plan.md              ← sheet I/O contracts and conventions
-│   ├── BUILD-SHEET-01.md              ← step-by-step guide for Sheet 01
-│   ├── BUILD-SHEET-02.md              ← step-by-step guide for Sheet 02
-│   ├── BUILD-SHEET-03.md              ← step-by-step guide for Sheet 03
-│   ├── BUILD-SHEET-04.md              ← step-by-step guide for Sheet 04
-│   ├── BUILD-SHEET-05.md              ← step-by-step guide for Sheet 05
+│   ├── BUILD-SHEET-0[1-5].md          ← step-by-step schematic build guides
 │   ├── FABRICATION.md                 ← gerber export + JLCPCB order guide
 │   └── BRING-UP.md                    ← staged power-on test procedure
-├── fabrication/                        ← gerbers + assembly files (KiCad-generated, not in repo)
+├── fabrication/                        ← gerbers + assembly files (git-ignored)
 └── firmware/
     ├── eeprom-image.md                ← RTL8153B EEPROM byte layout
     ├── eeprom-default.yaml            ← default EEPROM config (VID/PID/MAC)
-    └── eeprom_encoder.py              ← generates .bin from YAML config
+    ├── eeprom_encoder.py              ← generates .bin from YAML config
+    ├── test_eeprom_encoder.py         ← pytest suite
+    └── requirements.txt               ← PyYAML, pytest
 ```
 
 ## Getting Started
 
+### Viewing / editing the design
+
 1. Open `hardware/PoE-USBC-Gigabit.kicad_pro` in **KiCad 8.0+**
-2. Read `docs/design-spec.md` — note the 4 mm creepage rule between the PoE primary and USB secondary
-3. Order parts per `docs/bom.md`
-4. The schematic is split into 5 hierarchical sheets — see `docs/schematic-plan.md`
-5. When boards arrive, follow `docs/BRING-UP.md` for the staged power-on procedure
+2. Read `docs/design-spec.md` before making any layout changes — the 4 mm creepage rule between the PoE primary and USB secondary is a hard constraint
+3. The schematic is split across 5 hierarchical sheets; `docs/schematic-plan.md` documents the sheet I/O contracts and net class assignments
+
+### Building the schematic from scratch
+
+Follow the `docs/BUILD-SHEET-0[1-5].md` guides in order. Each guide walks through component placement, wiring, ERC expectations, and footprint assignment for one sheet. Run ERC (`F8`) after each sheet before moving to the next.
+
+### Fabrication
+
+See `docs/FABRICATION.md` for the full gerber export procedure and JLCPCB order settings (impedance control, isolation slot, ENIG finish).
+
+### Programming the EEPROM
+
+Each board needs a unique MAC address written to U3 (93LC46 EEPROM). Generate the binary from the YAML config:
+
+```bash
+pip install -r firmware/requirements.txt
+cd firmware
+python3 eeprom_encoder.py eeprom-default.yaml   # → eeprom-default.bin
+```
+
+Edit `mac:` in `eeprom-default.yaml` to a unique value before generating. Then program the binary using one of:
+
+- **Option A (preferred):** Realtek's `r8153_fw_tool` (Linux) or `RTL8153B_EEPROM_Programmer.exe` (Windows) over USB once the board enumerates
+- **Option B:** Bus Pirate / FT232H on test points TP1–TP4 (MicroWire, CS active-high, 16-bit words, ≤ 3 MHz)
+- **Option C:** Pre-program the 93LC46 before assembly via a distributor programming service
+
+See `firmware/eeprom-image.md` for the full byte map.
+
+### Bring-up
+
+Follow `docs/BRING-UP.md` — a 6-stage procedure from cold resistance checks through full-load thermal test. Do not skip stages; the primary side runs at up to 57 V.
 
 ## License
 
-CERN-OHL-S v2 (hardware), MIT (any firmware/scripts).
+CERN-OHL-S v2 (hardware), MIT (firmware/scripts).
 
 ## References
 
-- Ubiquiti UACC-Adapter-PoE-USBC datasheet (the inspiration)
+- Ubiquiti UACC-Adapter-PoE-USBC (the inspiration)
 - Silicon Labs Si3402-B reference design AN1004
-- Realtek RTL8153B datasheet & EEPROM tools (NDA)
+- Realtek RTL8153B datasheet & EEPROM tools (NDA required from Realtek)
