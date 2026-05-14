@@ -6,7 +6,34 @@ on:
 
 jobs:
   firmware:
-    name: EEPROM encoder
+    name: EEPROM encoder (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    defaults:
+      run:
+        working-directory: firmware
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest pytest-cov
+
+      - name: Generate default EEPROM image
+        run: python3 eeprom_encoder.py eeprom-default.yaml /tmp/eeprom-default.bin
+
+      - name: Run tests with coverage threshold
+        run: pytest test_eeprom_encoder.py -v --cov=eeprom_encoder --cov-report=term-missing --cov-fail-under=90
+
+  lint:
+    name: Lint & type-check
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -17,13 +44,13 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt pytest
+      - name: Install tools
+        run: pip install -r requirements.txt ruff mypy types-PyYAML
 
-      - name: Generate default EEPROM image
-        run: python3 eeprom_encoder.py eeprom-default.yaml /tmp/eeprom-default.bin
+      - name: Ruff
+        run: ruff check eeprom_encoder.py test_eeprom_encoder.py
 
-      - name: Run tests
-        run: pytest test_eeprom_encoder.py -v
+      - name: Mypy
+        run: mypy --strict eeprom_encoder.py
