@@ -95,7 +95,7 @@ PoEt/
 └── firmware/
     ├── eeprom-image.md                ← RTL8153B EEPROM byte layout
     ├── eeprom-default.yaml            ← default EEPROM config (VID/PID/MAC)
-    └── eeprom-encoder.py              ← generates .bin from YAML config
+    └── eeprom_encoder.py              ← generates .bin from YAML config
 ```
 
 ## Getting Started

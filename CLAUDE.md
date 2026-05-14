@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 PoEt is an open-hardware KiCad PCB project that converts an 802.3af PoE Ethernet drop into a USB-C port delivering 5 V / 2 A power and Gigabit Ethernet over USB 3.0. It is a clone of the Ubiquiti UACC-Adapter-PoE-USBC. Licensed CERN-OHL-S v2 (hardware) and MIT (firmware/scripts).
 
-The only software in this repo is the EEPROM encoder script (`firmware/eeprom-encoder.py`). Everything else is hardware design files and documentation.
+The only software in this repo is the EEPROM encoder script (`firmware/eeprom_encoder.py`). Everything else is hardware design files and documentation.
 
 ## Firmware (the only runnable code)
 
@@ -20,8 +20,8 @@ pip install -r firmware/requirements.txt   # installs PyYAML
 
 ```bash
 cd firmware
-python3 eeprom-encoder.py eeprom-default.yaml          # → eeprom-default.bin
-python3 eeprom-encoder.py eeprom-default.yaml out.bin  # explicit output path
+python3 eeprom_encoder.py eeprom-default.yaml          # → eeprom-default.bin
+python3 eeprom_encoder.py eeprom-default.yaml out.bin  # explicit output path
 ```
 
 The script reads a YAML config and writes a 128-byte binary for the 93LC46 EEPROM (U3). The generated `.bin` is git-ignored; always regenerate from the YAML source.

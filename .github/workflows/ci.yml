@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  firmware:
+    name: EEPROM encoder
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest
+
+      - name: Generate default EEPROM image
+        run: python3 eeprom_encoder.py eeprom-default.yaml /tmp/eeprom-default.bin
+
+      - name: Run tests
+        run: pytest test_eeprom_encoder.py -v

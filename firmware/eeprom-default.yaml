@@ -1,5 +1,5 @@
 # RTL8153B EEPROM configuration — PoEt Rev A defaults
-# Run: python3 eeprom-encoder.py eeprom-default.yaml
+# Run: python3 eeprom_encoder.py eeprom-default.yaml
 # Output: eeprom-default.bin (128 bytes)
 #
 # To program a board:

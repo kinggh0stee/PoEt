@@ -107,7 +107,11 @@ The 93C46 stores VID, PID, MAC, and strap defaults. Without it, the RTL8153B use
    - U3 GND → `GND`
    - U3 ORG → `GND` (selects 16-bit word mode; RTL8153B reads EEPROM as 64×16-bit words)
 3. Add 100 nF decoupling between U3 VCC and GND.
-4. **Add 4 test points** (TP1–TP4) on CS, CLK, DI, DO — these allow in-circuit EEPROM programming after board assembly. Name them explicitly; they're how you write the MAC address per `firmware/eeprom-image.md`.
+4. **Add 4 test points** (TP1–TP4) on CS, CLK, DI, DO — these allow in-circuit EEPROM programming after board assembly via Bus Pirate / FT232H (see `firmware/eeprom-image.md` §Option B):
+   - Place `Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical` or `TestPoint:TestPoint_Pad_D1.5mm` for each.
+   - Assign references **TP1** = CS, **TP2** = CLK, **TP3** = DI, **TP4** = DO and label them on the schematic so they appear in the BOM.
+   - Add them to nets `EEPROM_CS`, `EEPROM_CLK`, `EEPROM_DI`, `EEPROM_DO` between U3 and U2 (not on the far side of U3's ESD/bypass caps).
+   - On the PCB, place TP1–TP4 as a row near U3, accessible with a standard 2.54 mm probe clip. Keep them on B.Cu or the board edge — not buried under T1 or the RJ45.
 
 ## Step 7 — Reset circuit (SW1)
 

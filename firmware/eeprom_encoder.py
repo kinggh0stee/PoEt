@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 RTL8153B EEPROM encoder — PoEt project
-Usage: python3 eeprom-encoder.py <config.yaml> [output.bin]
+Usage: python3 eeprom_encoder.py <config.yaml> [output.bin]
 Output: 128-byte binary suitable for 93LC46 (PoEt U3)
 
 Requires: PyYAML  (pip install PyYAML  or  pip install -r requirements.txt)
@@ -26,7 +26,13 @@ def encode_mac(mac_str: str) -> bytes:
     parts = mac_str.strip().split(":")
     if len(parts) != 6:
         raise ValueError(f"MAC address must have 6 octets: {mac_str!r}")
-    return bytes(int(p, 16) for p in parts)
+    result = []
+    for i, p in enumerate(parts):
+        try:
+            result.append(int(p, 16))
+        except ValueError:
+            raise ValueError(f"MAC octet {i} is not valid hex: {p!r} in {mac_str!r}")
+    return bytes(result)
 
 
 def encode_usb_string(text: str) -> bytes:
@@ -45,10 +51,14 @@ def build_eeprom(cfg: dict) -> bytes:
 
     # 0x02-0x03: VID (little-endian)
     vid = int(cfg.get("vid", 0x0BDA))
+    if not 0x0001 <= vid <= 0xFFFE:
+        raise ValueError(f"VID 0x{vid:04X} out of valid USB range 0x0001–0xFFFE")
     struct.pack_into("<H", buf, 0x02, vid)
 
     # 0x04-0x05: PID (little-endian)
     pid = int(cfg.get("pid", 0x8153))
+    if not 0x0000 <= pid <= 0xFFFF:
+        raise ValueError(f"PID 0x{pid:04X} out of valid USB range 0x0000–0xFFFF")
     struct.pack_into("<H", buf, 0x04, pid)
 
     # 0x06-0x0B: MAC address
