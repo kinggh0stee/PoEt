@@ -101,7 +101,8 @@ def main():
         cfg = yaml.safe_load(f)
 
     data = build_eeprom(cfg)
-    assert len(data) == EEPROM_SIZE
+    if len(data) != EEPROM_SIZE:
+        raise RuntimeError(f"EEPROM buffer is {len(data)} bytes, expected {EEPROM_SIZE}")
 
     with open(out_path, "wb") as f:
         f.write(data)
@@ -118,6 +119,8 @@ def main():
     print(f"  VID: 0x{struct.unpack_from('<H', data, 0x02)[0]:04X}")
     print(f"  PID: 0x{struct.unpack_from('<H', data, 0x04)[0]:04X}")
     print(f"  MAC: {mac_str}")
+    if mac_str.upper() == "02:00:5E:00:00:01":
+        print("  WARNING: MAC is the template default — update before deploying multiple boards")
     print(f"  Self-powered: {bool(data[0x0F] & 0x20)}")
 
 
