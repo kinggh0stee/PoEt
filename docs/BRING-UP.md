@@ -2,6 +2,10 @@
 
 Work through these stages in order. Each stage verifies one functional block before the next is powered. **Do not skip ahead.** The PoE primary runs at up to 57 V; a wiring error found in Stage 1 costs nothing. The same error found in Stage 3 can destroy the RTL8153B.
 
+> **Capacitor discharge:** After removing PoE or bench PSU power, wait at least 10 seconds before probing or reworking the primary side. C1 (10 µF / 100 V) and C2 (47 µF / 100 V) can hold charge above 50 V. Confirm V_POE+ < 5 V with a DMM before touching primary-side pads.
+
+> **Ground coupling:** Y-cap C3 (1 nF / 2 kV) weakly couples `GND_POE` to secondary `GND`. The USB-C shell is therefore not fully floating from the PoE primary. If the PoE switch and the USB host have different protective-earth potentials, small common-mode currents flow through the host. This is normal EMC practice but means the board is not galvanically safe to touch on both sides simultaneously while powered.
+
 ---
 
 ## Before you touch a PSU
