@@ -14,7 +14,9 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 | U6 | 1 | Optocoupler | Si3402-B feedback isolation | PC817B | LCSC C7440 |
 | U7 | 1 | Shunt regulator | TL431 reference | TL431ASN | LCSC C7831 |
 | U101, U102 | 2 | ESD protection (MDI) | 4-line TVS array — Sheet 01, MDI0±–MDI3± | NUP4202W1T1G | Digi-Key |
-| U10 | 1 | ESD protection (USB-C) | 4-line TVS array — Sheet 05, SS pair + D+/D- | NUP4202W1T1G | Digi-Key |
+| U10a, U10b, U10c | 3 | ESD protection (USB-C) | 4-line TVS array — Sheet 05: U10a on TX1/RX1, U10b on TX2/RX2, U10c on D+/D- | NUP4202W1T1G | Digi-Key |
+| U11 | 1 | SS orientation mux | 4-channel 2:1 USB 3.0 SuperSpeed mux/demux, ≤ 12 Gbps, SEL-controlled | **PI3DBS12412A** (Diodes Inc.) or FSUSB43L10X (ON Semi) | Digi-Key / Mouser |
+| U12 | 1 | CC orientation comparator | Single supply comparator, SOT-23-5 — detects which CC pin is active to drive U11 SEL | **LMV321** | LCSC / Digi-Key |
 
 ## Magnetics & connectors
 
@@ -50,6 +52,7 @@ Quantities are per board. Substitutes must match footprint **and** electrical ra
 | C14 | 1 | 100 nF / 16 V | X7R 0402 | High-freq bypass at VBUS |
 | C15, C16 | 2 | 100 nF / 16 V | X7R 0402 | USB SS AC-coupling on TX pair |
 | **R10, R11** | 2 | **22 kΩ 1 %** | 0402 | Rp on CC1, CC2 → 5 V (advertise 1.5 A) |
+| R12 | 1 | 10 kΩ | 0402 | Pull-up from U12 comparator output to +3V3 (open-drain output to SEL logic level) |
 | F1 | 1 | 2 A / 6 V PPTC | Resettable fuse | VBUS over-current protection; Bourns MF-MSMF200/33X-2 or TE MICROSMD200F-2 |
 
 ## RTL8153B support

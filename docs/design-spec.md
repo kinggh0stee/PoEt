@@ -23,10 +23,10 @@ Rev A · 2026-05 · v3 (simplified to match Ubiquiti UACC-Adapter-PoE-USBC)
 
 ### 1.3 USB output
 - **Connector:** USB-C receptacle, 24-pin
-- **Role:** UFP (data device) + Source (power), **single-orientation SS**
+- **Role:** UFP (data device) + Source (power), **dual-orientation SS via mux**
 - **Data:**
-  - USB 3.2 Gen 1 (5 Gbps) on TX1+/-, RX1+/- pair only — wired to RTL8153B SuperSpeed pins
-  - TX2/RX2 pair left unconnected
+  - USB 3.2 Gen 1 (5 Gbps) on both TX1/RX1 and TX2/RX2 pairs — routed through a 4-channel 2:1 SS mux (U11, PI3DBS12412A or FSUSB43L10X) controlled by an orientation-detection comparator (U12, LMV321)
+  - Orientation detected by comparing CC1 to CC2: the active CC pin is pulled low by the host's Rd (≈ 0.9 V with 22 kΩ Rp); the idle CC stays at ~5 V. Comparator output drives the mux SEL pin.
   - USB 2.0 D+/D- direct from RTL8153B; both A6/B6 (D+) and A7/B7 (D-) shorted at the connector pads, so USB 2.0 enumerates regardless of orientation
 - **Power source:** 5 V / 2 A from secondary rail
 - **CC configuration:**
@@ -81,8 +81,12 @@ RJ45 magnetics MDI[0..3]+/- (4 pairs in 1000BASE-T)
   → RTL8153B MDI inputs
   → internal Gigabit PHY + MAC + USB 3.0 device
   → SuperSpeed differential (SSTX±, SSRX±)
-  → AC-coupling caps (100 nF) on TX pair only
-  → USB-C TX1±, RX1± pins (single orientation)
+  → AC-coupling caps (100 nF) on SSTX pair only (upstream of mux)
+  → PI3DBS12412A SS mux (SEL driven by CC orientation comparator)
+      SEL=0 (CC1 active): SSTX→TX1±, RX1±→SSRX
+      SEL=1 (CC2 active): SSTX→TX2±, RX2±→SSRX
+  → ESD (NUP4202W1) on all four SS pairs at connector
+  → USB-C TX1±/RX1± and TX2±/RX2± pins (both orientations)
   → USB 2.0 D+/D- routed direct, both orientations shorted at pad
 ```
 
@@ -149,7 +153,7 @@ Manufacturer: JLCPCB JLC04161H-7628 stackup, controlled impedance:
 |---|---|---|---|
 | 1 | PoE class | **802.3af** (12.95 W) | Matches Ubiquiti reference product spec exactly |
 | 2 | Output | **5 V / 2 A fixed**, no PD | Same as reference |
-| 3 | USB-C orientation | **Single-orientation SS** | Reference product almost certainly does this; saves $1.50 BOM |
+| 3 | USB-C orientation | **Dual-orientation SS via mux** | PI3DBS12412A + LMV321 comparator; ~$1.70 BOM delta; eliminates the "insert in the right direction" limitation |
 | 4 | PD controller | **Si3402-B** | Single-chip integrated PD + flyback PWM, simplest possible |
 | 5 | Bridges | **Schottky** (DF06S ×2) | Only 0.5 W loss at 12 W; active rectifiers (LT4321) overkill |
 | 6 | USB-Eth bridge | **RTL8153B** | Mature, in-tree Linux driver, ~$3 single qty |
@@ -157,6 +161,5 @@ Manufacturer: JLCPCB JLC04161H-7628 stackup, controlled impedance:
 
 ## 6. Future work
 
-- Reversible USB-C (add PI3DBS12412A SS mux) → +$1.50, full orientation reversibility
 - Active rectifiers (LT4321 ×2) → fewer thermal concerns at 802.3at upgrade
 - Upgrade to 802.3at + USB-PD 9 V

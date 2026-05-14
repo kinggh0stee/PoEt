@@ -100,7 +100,7 @@ All fabrication outputs go to `fabrication/` (git-ignored). Steps in `docs/FABRI
 
 - **4 mm creepage/clearance** between PoE primary and USB secondary — in all four copper layers
 - **PoE-rated RJ45** (J1) required — non-PoE jacks lack center-tap traces and can't handle DC current
-- **Single-orientation SS:** TX1/RX1 only are wired; TX2/RX2 are NC. USB 2.0 (D+/D-) is reversible by shorting A6+B6 and A7+B7 at the connector pads
+- **Dual-orientation SS via mux (U11):** TX1/RX1 and TX2/RX2 are both wired through a PI3DBS12412A SS mux. U12 (LMV321 comparator) reads CC1 vs CC2 to detect cable orientation and drives the mux SEL pin. AC-coupling caps (C15/C16) sit upstream of the mux on the SSTX path. USB 2.0 (D+/D-) is reversible by shorting A6+B6 and A7+B7 at the connector pads
 - **22 kΩ Rp on CC1/CC2** (not 10 kΩ): advertises 1.5 A source; using 10 kΩ would advertise 3 A which the 2 A supply cannot sustain
 - **Flyback transformer T1** must be matched to Si3402-B reference design AN1004 — do not substitute blindly
 - **Crystal Y1:** 25 MHz, CL = 12 pF, load capacitors C20/C21 = 18 pF NP0; verify against chosen crystal datasheet

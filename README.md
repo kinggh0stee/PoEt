@@ -9,12 +9,11 @@ Design by [gh0stee.com](https://gh0stee.com)
 - Single RJ45 input from a PoE switch; single USB-C output to the host device
 - USB-C host sees a Gigabit Ethernet adapter — driver-less on Linux, Windows, macOS, ChromeOS, and iPadOS
 - Up to **10 W (5 V × 2 A)** delivered over USB-C, sufficient for a Raspberry Pi Zero 2 W, Pi 4 (light load), USB-C cameras, and similar single-board computers
-- Full Gigabit throughput with a USB 3.x cable; degrades gracefully to ~480 Mbps on a USB 2.0 cable
+- Full Gigabit throughput with a USB 3.x cable in either orientation; degrades gracefully to ~480 Mbps on a USB 2.0 cable
 
 ## Limitations
 
 - No USB Power Delivery — output is fixed 5 V; laptops and fast-charge phones are not supported
-- SuperSpeed lanes are single-orientation only. USB 2.0 fallback works in either orientation, so the device always enumerates; Gigabit throughput requires the cable to be inserted in the correct orientation
 
 ## Block Diagram
 
