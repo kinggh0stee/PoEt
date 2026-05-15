@@ -10,6 +10,7 @@ Design by [gh0stee.com](https://gh0stee.com)
 - USB-C host sees a Gigabit Ethernet adapter — driver-less on Linux, Windows, macOS, ChromeOS, and iPadOS
 - Up to **10 W (5 V × 2 A)** delivered over USB-C, sufficient for a Raspberry Pi Zero 2 W, Pi 4 (light load), USB-C cameras, and similar single-board computers
 - Full Gigabit throughput with a USB 3.x cable in either orientation; degrades gracefully to ~480 Mbps on a USB 2.0 cable
+- **Parametric OpenSCAD case** included — snap-fit standalone enclosure with LED windows and a reset pinhole, prints without supports
 
 ## Limitations
 
@@ -85,6 +86,8 @@ PoEt/
 │   ├── BUILD-SHEET-0[1-5].md          ← step-by-step schematic build guides
 │   ├── FABRICATION.md                 ← gerber export + JLCPCB order guide
 │   └── BRING-UP.md                    ← staged power-on test procedure
+├── case/
+│   └── poet-case.scad                 ← parametric snap-fit enclosure (OpenSCAD)
 ├── fabrication/                        ← gerbers + assembly files (git-ignored)
 └── firmware/
     ├── eeprom-image.md                ← RTL8153B EEPROM byte layout
@@ -131,6 +134,18 @@ See `firmware/eeprom-image.md` for the full byte map.
 ### Bring-up
 
 Follow `docs/BRING-UP.md` — a 6-stage procedure from cold resistance checks through full-load thermal test. Do not skip stages; the primary side runs at up to 57 V.
+
+### 3D-printed case
+
+Open `case/poet-case.scad` in **OpenSCAD 2021.01+**. Both shells are in print-ready orientation — no rotation needed in your slicer.
+
+Before printing:
+1. Verify `clr_top` clears the tallest component on your board (default 12 mm; T1 transformer body ≈ 10 mm)
+2. Adjust `led_xpos`, `led_ypos`, `sw_xpos`, `sw_ypos` to match the KiCad component positions
+3. Verify `rj45_h` and `usbc_h` against the actual connector datasheets
+4. Print a single-wall cross-section slice first to confirm the snap geometry fits your printer's tolerance
+
+All dimensions are parametric — tunable at the top of the file.
 
 ## License
 
