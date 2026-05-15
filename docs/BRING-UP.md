@@ -166,6 +166,143 @@ If a rail is missing: check EN pull-up resistors (Sheet 03), check input bypass 
 
 ---
 
+## Stage 7 — Pre-compliance safety screening (CSA / 62368-1 readiness)
+
+**Goal:** catch insulation and thermal failures in-house before sending samples
+to an NRTL. None of these tests certify the product, but failures here are
+near-certain failures at the lab. See `docs/CSA-COMPLIANCE.md` for the standards
+mapping and the open items list.
+
+> **Safety.** Stage 7 applies 3 kV between exposed conductors. Use a dedicated
+> hi-pot tester with a ground-fault interlock and a high-voltage probe.
+> Do **not** use a regular bench DMM. Wear insulated gloves; clear the bench;
+> never leave the tester unattended while energized.
+
+### 7.1 Dielectric strength (hi-pot), routine production test
+
+**Equipment:** AC hi-pot tester capable of 3 kV rms with adjustable trip
+current (e.g. Slaughter 2700, GW Instek GPT-9904A, Vitrek 944i)
+
+**Setup:**
+- Board unpowered, no PoE input, no USB cable
+- Short all primary-side test points together (PAIR_A_HI, PAIR_A_LO,
+  PAIR_B_HI, PAIR_B_LO, V_POE+, GND_POE) — this is the "primary" terminal
+- Short all secondary-side exposed conductors (+5 V test point, GND test
+  point, USB-C shell via the receptacle case) — this is the "secondary"
+  terminal
+- Connect hi-pot HV lead to primary; return to secondary
+
+**Procedure:**
+1. Ramp at ≤ 500 V/s to **3000 V rms, 50/60 Hz**.
+2. Hold for **60 seconds**.
+3. Trip current set to **5 mA**.
+
+**Pass:** no breakdown, no flashover, no arc, leakage current stays ≤ 5 mA
+for the full hold time.
+
+**Common failures:**
+- Trip on ramp → check for solder bridge or contamination across the slot
+- Trip at 1.5–2 kV → Y-cap C3 is Y2-rated (Y2 typical breakdown ~3 kV vs Y1
+  ~8 kV — confirm the part is Y1 per BOM)
+- Optocoupler U6 breakdown → wrong grade; needs PC817B-X1 or TLP785
+
+### 7.2 Insulation resistance
+
+**Equipment:** Megohmmeter at 500 V DC (e.g. Fluke 1507, Megger MIT415)
+
+**Procedure:**
+1. Same primary / secondary terminals as §7.1.
+2. Apply **500 V DC for 60 seconds**.
+3. Read insulation resistance after the 60 s soak.
+
+**Pass:** ≥ **100 MΩ**. 62368-1 §5.4.9.2 sets 2 MΩ as the bare minimum after a
+humidity preconditioning step; 100 MΩ on a clean board is realistic.
+
+### 7.3 Touch current (leakage)
+
+**Equipment:** Touch-current meter implementing the IEC 60990 networks A & B
+(e.g. Megger PAT420, Chroma 19032)
+
+**Setup:**
+- Board powered from a calibrated 802.3af PoE injector at **1.06× nominal
+  voltage** (60 V rather than 57 V) per §5.7.4
+- USB-C plugged into an isolated USB host
+- Touch-current meter clipped between the USB-C shell and protective earth
+
+**Pass:** ≤ **0.25 mA** (Class II equipment limit, §5.7.4 Table 5).
+
+> Expect leakage roughly equal to the charging current through C3. With C3 =
+> 1 nF and 60 Hz mains-equivalent disturbance, capacitive leakage is far
+> below 0.25 mA — but verify on an actual sample.
+
+### 7.4 Temperature rise at 25 °C ambient (extended)
+
+Stage 6 covers a 15-minute thermal check. For 62368-1 §B.2.6 you need a full
+**thermal-equilibrium** measurement (typically 1–2 h until ΔT < 1 °C / 30 min).
+
+**Procedure:**
+1. Repeat the Stage 6 setup (1.5 A USB load + iperf3 saturating Gigabit).
+2. Log temperature every 5 min on:
+   - U1 Si3402-B package top
+   - T1 transformer core
+   - U2 RTL8153B package top
+   - PCB surface midway between primary and secondary (FR-4 max 105 °C)
+   - Bulk caps C1 (X7R 1210) and C2 (Al electrolytic)
+3. Wait until two consecutive readings ≤ 1 °C apart on every channel.
+4. Record ambient at each reading and compute rise: ΔT = T_part − T_ambient.
+
+**Pass criteria (62368-1 Table B.10, abbreviated):**
+
+| Material | T_max | Typical headroom needed |
+|---|---|---|
+| FR-4 PCB | 105 °C | ΔT ≤ 80 °C at 25 °C ambient |
+| X7R ceramic | 125 °C | ΔT ≤ 100 °C |
+| Al electrolytic (C2) | per datasheet, typically 105 °C | ΔT ≤ 80 °C |
+| Transformer winding (Class B insulation) | 130 °C | ΔT ≤ 105 °C |
+| Optocoupler PC817 | per datasheet, typically 110 °C | ΔT ≤ 85 °C |
+
+### 7.5 Temperature rise at 40 °C ambient
+
+Same as §7.4 but in a 40 °C environmental chamber. 62368-1 expects 25 °C
+ambient with allowance for a max operating ambient marked on the product;
+if you market for 40 °C operation, this test is required.
+
+### 7.6 Abnormal operation — output short
+
+**Procedure:**
+1. PoE-power the board normally.
+2. Short USB-C VBUS to GND with a low-resistance shunt (< 100 mΩ).
+3. Hold for **7 hours** (§B.4.5 single-fault test duration).
+4. Monitor: thermal IR camera or thermocouples on U1, T1, F1, PCB hot spots.
+
+**Pass:**
+- No fire, no breach of the enclosure, no expulsion of molten material
+- F1 (PPTC) latches into high-impedance state quickly (< 5 s) and stays there
+- No damage to the PoE PSE (port should reach its OCP threshold and remove
+  power, then re-attempt detection per 802.3 — this is normal)
+- After removing the short and cycling PoE, the board recovers and re-enumerates
+
+### 7.7 Abnormal operation — RJ45 cable short to mains
+
+Not feasible to test in-house; this is one for the NRTL. Documented here for
+the technical file: a 230 V AC application to the RJ45 pins shall not breach
+the isolation barrier or cause an unsafe state on the USB-C side. The Y1
+C3 + transformer reinforced insulation are the protective elements.
+
+### 7.8 Sign-off checklist before NRTL submission
+
+- [ ] §7.1 hi-pot 3 kV / 60 s passed on **all** sample units (production
+      sample size = NRTL's choice, usually 5–10)
+- [ ] §7.2 IR ≥ 100 MΩ on all samples
+- [ ] §7.3 touch current ≤ 0.25 mA on all samples
+- [ ] §7.4 thermal margins documented; no material exceeds Table B.10
+- [ ] §7.5 40 °C ambient repeat passes (only if claiming 40 °C operation)
+- [ ] §7.6 7 h output short held; no fire, recovery confirmed
+- [ ] All BOM **§ CSA** lines have certificate numbers recorded
+- [ ] `docs/CSA-COMPLIANCE.md` §8 open items all closed
+
+---
+
 ## Fault reference
 
 | Symptom | Likely cause | Check |
